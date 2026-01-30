@@ -1,137 +1,1983 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LinkVault URL Shortener</title>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Admin Panel - Code Protection Tool</title>
+    <style>
+        /* ============================================
+           DESIGN SYSTEM - CSS Variables
+           ============================================ */
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --bg-input: #0d1321;
+            --bg-hover: #243049;
+            
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --accent-primary: #3b82f6;
+            --accent-primary-hover: #2563eb;
+            --accent-success: #10b981;
+            --accent-success-hover: #059669;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-danger-hover: #dc2626;
+            
+            --border-color: #2a3a52;
+            --border-focus: #3b82f6;
+            
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
+            --shadow-glow: 0 0 20px rgba(59,130,246,0.3);
+            
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.25s ease;
+        }
 
-</style>
+        /* ============================================
+           RESET & BASE STYLES
+           ============================================ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Disable text selection on sensitive areas */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* ============================================
+           TYPOGRAPHY
+           ============================================ */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+
+        h1 { font-size: 2rem; }
+        h2 { font-size: 1.5rem; }
+        h3 { font-size: 1.25rem; }
+
+        p { color: var(--text-secondary); }
+
+        /* ============================================
+           LAYOUT COMPONENTS
+           ============================================ */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-1 { gap: 0.5rem; }
+        .gap-2 { gap: 1rem; }
+        .gap-3 { gap: 1.5rem; }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-cols-1 { grid-template-columns: 1fr; }
+
+        @media (min-width: 768px) {
+            .md-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            .lg-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* ============================================
+           CARD COMPONENT
+           ============================================ */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-normal);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-primary);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+            border-radius: var(--radius-md);
+            font-size: 1.25rem;
+        }
+
+        /* ============================================
+           BUTTON STYLES
+           ============================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            min-height: 44px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--accent-primary-hover), #1d4ed8);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent-success), var(--accent-success-hover));
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, var(--accent-success-hover), #047857);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-danger), var(--accent-danger-hover));
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, var(--accent-danger-hover), #b91c1c);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            min-height: 36px;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* ============================================
+           INPUT STYLES
+           ============================================ */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            color: var(--text-primary);
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+            min-height: 44px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-textarea {
+            min-height: 180px;
+            resize: vertical;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* ============================================
+           LOGIN PAGE
+           ============================================ */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: var(--bg-primary);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .login-error {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* ============================================
+           DASHBOARD LAYOUT
+           ============================================ */
+        .dashboard {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (min-width: 640px) {
+            .user-info { display: flex; }
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-content {
+            display: flex;
+            gap: 0.25rem;
+            padding: 0.5rem 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            border: none;
+            background: none;
+            min-height: 44px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            padding: 1.5rem 1rem;
+            background: var(--bg-primary);
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Page Sections */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* ============================================
+           DASHBOARD HOME
+           ============================================ */
+        .stats-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.blue { background: rgba(59,130,246,0.15); color: var(--accent-primary); }
+        .stat-icon.green { background: rgba(16,185,129,0.15); color: var(--accent-success); }
+        .stat-icon.yellow { background: rgba(245,158,11,0.15); color: var(--accent-warning); }
+        .stat-icon.red { background: rgba(239,68,68,0.15); color: var(--accent-danger); }
+
+        .stat-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .quick-actions { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            .quick-actions { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .action-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+
+        .action-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .action-card-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           PROTECTION TOOLS
+           ============================================ */
+        .tool-section {
+            margin-bottom: 2rem;
+        }
+
+        .tool-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .tool-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .tool-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .tool-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .tool-panel-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .tool-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .output-box {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: var(--accent-success);
+            max-height: 300px;
+            overflow: auto;
+            word-break: break-all;
+        }
+
+        .output-box:empty::before {
+            content: 'Protected output will appear here...';
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           THEME MANAGER
+           ============================================ */
+        .theme-form {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .theme-form-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .theme-form-grid { grid-template-columns: 1fr auto; align-items: end; }
+        }
+
+        .themes-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .theme-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            transition: all var(--transition-fast);
+        }
+
+        .theme-item:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .theme-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .theme-item-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theme-item-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .theme-item-content {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .theme-item-content { grid-template-columns: 1fr 1fr; }
+        }
+
+        .theme-code-preview {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+        }
+
+        .theme-code-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .theme-code-snippet {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--accent-success);
+            word-break: break-all;
+            max-height: 60px;
+            overflow: hidden;
+        }
+
+        .theme-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* ============================================
+           TOAST NOTIFICATIONS
+           ============================================ */
+        .toast-container {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 280px;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success { border-left: 3px solid var(--accent-success); }
+        .toast.error { border-left: 3px solid var(--accent-danger); }
+        .toast.info { border-left: 3px solid var(--accent-primary); }
+
+        .toast-icon {
+            font-size: 1.25rem;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1rem;
+        }
+
+        /* ============================================
+           MODAL
+           ============================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform var(--transition-normal);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.25rem;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        /* ============================================
+           UTILITY CLASSES
+           ============================================ */
+        .hidden { display: none !important; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .text-center { text-align: center; }
+        .text-success { color: var(--accent-success); }
+        .text-danger { color: var(--accent-danger); }
+
+        /* ============================================
+           SCROLLBAR STYLING
+           ============================================ */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-input);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ============================================
+           RESPONSIVE ADJUSTMENTS
+           ============================================ */
+        @media (max-width: 640px) {
+            .login-card { padding: 1.5rem; }
+            .card { padding: 1rem; }
+            .tool-panel { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.25rem; }
+        }
+    </style>
 </head>
-<body>
+<body class="no-select">
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
-<header>
-<div class="container">
-<h1 onclick="goHome()">LinkVault</h1>
+    <!-- Login Page -->
+    <div class="login-page" id="loginPage">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-logo">
+                    <div class="login-logo-icon">🛡️</div>
+                    <h1 class="login-title">Admin Panel</h1>
+                    <p class="login-subtitle">Code Protection Tool</p>
+                </div>
+                
+                <div class="login-error" id="loginError">
+                    Invalid credentials. Please try again.
+                </div>
 
-</div>
-</header>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="userId">User ID</label>
+                        <input type="text" id="userId" class="form-input" placeholder="Enter your user ID" required autocomplete="username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        🔐 Sign In
+                    </button>
+                </form>
 
-<div id="stepIndicator" class="step-indicator hidden">
-You are on Step <span id="currentStep">1</span> / <span id="totalSteps">3</span><span id="stepComplete"></span>
-</div>
+                <p class="mt-2 text-center" style="font-size: 0.8rem; color: var(--text-muted);">
+                    Default: admin / admin123
+                </p>
+            </div>
+        </div>
+    </div>
 
-<main>
-<div class="container">
+    <!-- Dashboard -->
+    <div class="dashboard hidden" id="dashboard">
+        <!-- Header -->
+        <header class="header no-select">
+            <div class="header-content">
+                <div class="header-brand">
+                    <div class="header-logo">🛡️</div>
+                    <span class="header-title">Admin Panel</span>
+                </div>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">A</div>
+                        <span id="userDisplay">admin</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm" id="logoutBtn">
+                        🚪 Logout
+                    </button>
+                </div>
+            </div>
+        </header>
 
+        <!-- Navigation -->
+        <nav class="nav no-select">
+            <div class="nav-content">
+                <button class="nav-item active" data-page="home">
+                    🏠 Dashboard
+                </button>
+                <button class="nav-item" data-page="js-protect">
+                    ⚡ JS Protection
+                </button>
+                <button class="nav-item" data-page="css-protect">
+                    🎨 CSS Protection
+                </button>
+                <button class="nav-item" data-page="themes">
+                    📦 Theme Manager
+                </button>
+            </div>
+        </nav>
 
-<div id="homepage" class="home-section">
-<h2>Shorten Your Links</h2>
-<p>Create secure short links with customizable verification steps.</p>
+        <!-- Main Content -->
+        <main class="main">
+            <div class="main-content">
+                
+                <!-- Home Page -->
+                <section class="page active" id="page-home">
+                    <div class="page-header">
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-description">Welcome to your code protection admin panel</p>
+                    </div>
 
-<div class="shortener-form">
-<input type="url" id="urlInput" placeholder="Paste your long URL here...">
-<button type="button" id="shortenBtn">Shorten URL</button>
-<div class="result-box" id="resultBox">
-<strong>Your short link:</strong><br>
-<a href="#" id="shortLink" target="_blank"></a>
-</div>
-</div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">📦</div>
+                            <div class="stat-info">
+                                <h3 id="statThemes">0</h3>
+                                <p>Saved Themes</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">⚡</div>
+                            <div class="stat-info">
+                                <h3 id="statJs">0</h3>
+                                <p>JS Protected</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon yellow">🎨</div>
+                            <div class="stat-info">
+                                <h3 id="statCss">0</h3>
+                                <p>CSS Protected</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red">🔒</div>
+                            <div class="stat-info">
+                                <h3>Active</h3>
+                                <p>Protection Status</p>
+                            </div>
+                        </div>
+                    </div>
 
-<div class="generator">
-<h3>Script Generator</h3>
-<p>Generate a script to intercept button links on your blog.</p>
-<label>Number of steps: <input type="number" id="stepsInput" min="1" max="10" value="3"></label>
-<button class="gen-btn" id="generateBtn">Generate Script</button>
-<pre class="script-box" id="scriptOutput"></pre>
-<button class="copy-btn" id="copyBtn">Copy Script</button>
-</div>
-</div>
+                    <h2 class="mb-2">Quick Actions</h2>
+                    <div class="quick-actions">
+                        <div class="action-card" data-navigate="js-protect">
+                            <div class="action-card-icon">⚡</div>
+                            <h3>Protect JavaScript</h3>
+                            <p>Obfuscate and encrypt your JavaScript code for maximum protection</p>
+                        </div>
+                        <div class="action-card" data-navigate="css-protect">
+                            <div class="action-card-icon">🎨</div>
+                            <h3>Protect CSS</h3>
+                            <p>Encrypt your stylesheets and inject them at runtime</p>
+                        </div>
+                        <div class="action-card" data-navigate="themes">
+                            <div class="action-card-icon">📦</div>
+                            <h3>Manage Themes</h3>
+                            <p>Save and organize your protected code under theme names</p>
+                        </div>
+                    </div>
+                </section>
 
+                <!-- JS Protection Page -->
+                <section class="page" id="page-js-protect">
+                    <div class="page-header">
+                        <h1 class="page-title">JavaScript Protection</h1>
+                        <p class="page-description">Obfuscate and encrypt your JavaScript code</p>
+                    </div>
 
-<article id="articlePage" class="hidden">
+                    <div class="tool-grid">
+                        <div class="tool-panel">
+                            <div class="tool-panel-header">
+                                <span class="tool-panel-title">📝 Original JavaScript</span>
+                            </div>
+                            <textarea 
+                                class="form-input form-textarea" 
+                                id="jsInput" 
+                                placeholder="// Paste your JavaScript code here...
+function hello() {
+    console.log('Hello World!');
+}"></textarea>
+                            <div class="tool-actions mt-2">
+                                <button class="btn btn-primary" id="protectJsBtn">
+                                    🔒 Protect JS
+                                </button>
+                                <button class="btn btn-outline" id="clearJsInput">
+                                    🗑️ Clear
+                                </button>
+                            </div>
+                        </div>
 
+                        <div class="tool-panel">
+                            <div class="tool-panel-header">
+                                <span class="tool-panel-title">🔐 Protected Output</span>
+                            </div>
+                            <div class="output-box" id="jsOutput"></div>
+                            <div class="tool-actions mt-2">
+                                <button class="btn btn-success" id="copyJsOutput" disabled>
+                                    📋 Copy
+                                </button>
+                                <button class="btn btn-outline" id="saveJsToTheme" disabled>
+                                    💾 Save to Theme
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-<div id="topTimer">
-<p class="timer-text" id="topTimerText"> Verify now </p>
-<button class="start-btn" id="topStartBtn">Verify</button>
-</div>
+                    <div class="card mt-2">
+                        <h3 class="mb-1">📌 Cloudflare Worker Format</h3>
+                        <p class="mb-1">Use this key format in your KV storage:</p>
+                        <code style="color: var(--accent-success);">themeName_js</code>
+                        <p class="mt-1" style="font-size: 0.85rem;">Load via: <code style="color: var(--accent-primary);">/__secure/?t=themeName</code></p>
+                    </div>
+                </section>
 
-<h2>Understanding Digital Security in Modern Times</h2>
-<p>In today's interconnected world, digital security has become paramount for individuals and organizations alike. The rapid advancement of technology has brought unprecedented convenience, but it has also introduced new vulnerabilities that malicious actors are eager to exploit.</p>
-<p>Cybersecurity experts emphasize the importance of layered security approaches. This means implementing multiple security measures that work together to create a robust defense system.</p>
+                <!-- CSS Protection Page -->
+                <section class="page" id="page-css-protect">
+                    <div class="page-header">
+                        <h1 class="page-title">CSS Protection</h1>
+                        <p class="page-description">Encrypt your stylesheets for runtime injection</p>
+                    </div>
 
-<div class="ad-slot">Advertisement Space</div>
+                    <div class="tool-grid">
+                        <div class="tool-panel">
+                            <div class="tool-panel-header">
+                                <span class="tool-panel-title">📝 Original CSS</span>
+                            </div>
+                            <textarea 
+                                class="form-input form-textarea" 
+                                id="cssInput" 
+                                placeholder="/* Paste your CSS code here... */
+body {
+    background: #000;
+    color: #fff;
+}"></textarea>
+                            <div class="tool-actions mt-2">
+                                <button class="btn btn-primary" id="protectCssBtn">
+                                    🔒 Protect CSS
+                                </button>
+                                <button class="btn btn-outline" id="clearCssInput">
+                                    🗑️ Clear
+                                </button>
+                            </div>
+                        </div>
 
-<h3>The Evolution of Online Threats</h3>
-<p>Over the past decade, online threats have evolved from simple viruses to sophisticated attacks that can compromise entire networks. Ransomware, phishing schemes, and social engineering attacks have become increasingly common.</p>
-<p>One of the most significant developments has been the rise of automated attacks. Bots and scripts can now probe systems for vulnerabilities at an unprecedented scale.</p>
+                        <div class="tool-panel">
+                            <div class="tool-panel-header">
+                                <span class="tool-panel-title">🔐 Protected Output</span>
+                            </div>
+                            <div class="output-box" id="cssOutput"></div>
+                            <div class="tool-actions mt-2">
+                                <button class="btn btn-success" id="copyCssOutput" disabled>
+                                    📋 Copy
+                                </button>
+                                <button class="btn btn-outline" id="saveCssToTheme" disabled>
+                                    💾 Save to Theme
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-<ul>
-<li>Phishing attacks have increased by over 300% in recent years</li>
-<li>Ransomware costs businesses annually billions of dollars</li>
-<li>Social engineering remains the most effective attack vector</li>
-<li>Mobile devices are increasingly targeted by malware</li>
-</ul>
+                    <div class="card mt-2">
+                        <h3 class="mb-1">📌 Cloudflare Worker Format</h3>
+                        <p class="mb-1">Use this key format in your KV storage:</p>
+                        <code style="color: var(--accent-success);">themeName_css</code>
+                        <p class="mt-1" style="font-size: 0.85rem;">Load via: <code style="color: var(--accent-primary);">/__secure/?t=themeName</code></p>
+                    </div>
+                </section>
 
-<div class="ad-slot">Advertisement Space</div>
+                <!-- Theme Manager Page -->
+                <section class="page" id="page-themes">
+                    <div class="page-header">
+                        <h1 class="page-title">Theme Manager</h1>
+                        <p class="page-description">Save and manage your protected code themes</p>
+                    </div>
 
+                    <div class="theme-form">
+                        <h3 class="mb-1">➕ Create New Theme</h3>
+                        <div class="theme-form-grid">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" for="themeName">Theme Name</label>
+                                <input type="text" id="themeName" class="form-input" placeholder="e.g., my-awesome-theme">
+                            </div>
+                            <button class="btn btn-primary" id="createThemeBtn">
+                                📦 Create Theme
+                            </button>
+                        </div>
+                    </div>
 
-<div id="centerTimer" class="hidden">
-<p class="timer-text" id="centerTimerText">click and scroll down</p>
-<button class="start-btn" id="centerStartBtn">Click Here</button>
-</div>
+                    <h2 class="mb-2">Saved Themes</h2>
+                    <div class="themes-list" id="themesList">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📦</div>
+                            <p>No themes saved yet</p>
+                            <p style="font-size: 0.85rem;">Create a theme and add protected code to get started</p>
+                        </div>
+                    </div>
+                </section>
 
-<h3>Best Practices for Personal Security</h3>
-<p>Protecting yourself online doesn't require technical expertise. Simple habits can significantly reduce your risk of falling victim to cyber attacks. Regular software updates, careful email handling, and strong password practices form the foundation of personal cybersecurity.</p>
-<p>Password managers have become essential tools for maintaining security without sacrificing convenience. These applications generate and store complex passwords, eliminating the need to remember dozens of unique credentials.</p>
+            </div>
+        </main>
+    </div>
 
-<div class="ad-slot">Advertisement Space</div>
+    <!-- Save to Theme Modal -->
+    <div class="modal-overlay" id="saveModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">💾 Save to Theme</h2>
+                <button class="modal-close" id="closeSaveModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="modalThemeName">Theme Name</label>
+                    <input type="text" id="modalThemeName" class="form-input" placeholder="Enter theme name">
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    This will save the protected code under the specified theme name.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelSaveModal">Cancel</button>
+                <button class="btn btn-primary" id="confirmSaveModal">Save</button>
+            </div>
+        </div>
+    </div>
 
-<h3>The Role of Verification Systems</h3>
-<p>Human verification systems play a crucial role in distinguishing legitimate users from automated bots. These systems help protect websites from spam, abuse, and unauthorized access while ensuring that real users can access the content they need.</p>
-<p>Modern verification methods have evolved beyond simple CAPTCHAs. Today's systems use sophisticated algorithms to analyze user behavior, making verification seamless for humans while remaining effective against bots.</p>
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">🗑️ Delete Theme</h2>
+                <button class="modal-close" id="closeDeleteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete theme "<strong id="deleteThemeName"></strong>"?</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDeleteModal">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteModal">Delete</button>
+            </div>
+        </div>
+    </div>
 
-<ol>
-<li>Verification protects against automated attacks</li>
-<li>It helps maintain service quality for legitimate users</li>
-<li>Modern systems minimize user friction</li>
-<li>Behavioral analysis provides invisible protection</li>
-</ol>
+    <script>
+        /* ============================================
+           SECURITY MEASURES
+           ============================================ */
+        (function() {
+            // Disable right-click context menu
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
 
-<div class="ad-slot">Advertisement Space</div>
+            // Disable keyboard shortcuts for inspect
+            document.addEventListener('keydown', function(e) {
+                // F12
+                if (e.key === 'F12') {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+                if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+U (view source)
+                if (e.ctrlKey && e.key.toUpperCase() === 'U') {
+                    e.preventDefault();
+                    return false;
+                }
+            });
 
+            // DevTools detection (basic)
+            let devToolsOpen = false;
+            const threshold = 160;
+            
+            function checkDevTools() {
+                const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+                const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+                
+                if (widthThreshold || heightThreshold) {
+                    if (!devToolsOpen) {
+                        devToolsOpen = true;
+                        console.clear();
+                        console.log('%c⚠️ Developer Tools Detected', 'color: red; font-size: 24px; font-weight: bold;');
+                    }
+                } else {
+                    devToolsOpen = false;
+                }
+            }
 
-<div id="bottomTimer" class="hidden">
-<p class="timer-text" id="bottomTimerText"> Please click here to start </p>
-<button class="start-btn" id="bottomStartBtn">Start</button>
-</div>
+            setInterval(checkDevTools, 1000);
+        })();
 
-<h3>Looking Toward the Future</h3>
-<p>As technology continues to evolve, so too will the methods used to protect digital assets. Artificial intelligence and machine learning are already being deployed to detect and respond to threats in real-time.</p>
-<p>The key to staying safe in this evolving landscape is remaining informed and adaptable. By understanding the threats we face and the tools available to counter them, we can navigate the digital world with confidence and security.</p>
+        /* ============================================
+           APPLICATION STATE
+           ============================================ */
+        const APP = {
+            SESSION_KEY: 'admin_session',
+            THEMES_KEY: 'admin_themes',
+            STATS_KEY: 'admin_stats',
+            
+            // Default credentials (in production, use proper auth)
+            USERS: {
+                'admin': 'admin123',
+                'user': 'user123'
+            },
 
-<div class="ad-slot">Advertisement Space</div>
+            currentProtectedJs: null,
+            currentProtectedCss: null,
+            pendingSaveType: null,
+            pendingDeleteTheme: null
+        };
 
+        /* ============================================
+           UTILITY FUNCTIONS
+           ============================================ */
+        function $(selector) {
+            return document.querySelector(selector);
+        }
 
-<div id="continueSection" class="continue-section">
-<p style="color:var(--success);font-weight:600;margin-bottom:15px;">All timers completed!</p>
-<button class="continue-btn" id="continueBtn">Continue</button>
-</div>
+        function $$(selector) {
+            return document.querySelectorAll(selector);
+        }
 
-</article>
+        function showToast(message, type = 'info') {
+            const container = $('#toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
 
-</div>
-</main>
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || icons.info}</span>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close">&times;</button>
+            `;
 
-<footer>
-<p>&copy; 2024 LinkVault. Secure URL Shortening Service.</p>
-</footer>
+            container.appendChild(toast);
 
-<script>
-(function(){0||1;var ks4mx_qp="RA5MBRYSCl4adxANMxUZAUwpaSIqJCJiMX8EVh4LDAccGwNEWgoKXx8pWANVF1YQARBUAwVIFF4GNFwESk0cFhpPAmEDBxERIBZ0M2s8PCY+KW0iOihDDFRuDE0zFRkBTBxWHxQKMEURL0pWBENLSGYeWBlVBRZDBjpXAmoXHQNMVRlaTmwVUAZ/VR9XCDscCA0ZVlUIFl0YZDN8TwIKUwQHVA4FBwRUVGIZElYADR4JBk1FEgMXdBg6VBNXFzoKJQwRTB0JDlQEPl4THkpDeRoJS0sUFBdYFzNcJlgEHVNRSF0EFhMOVBorFxFcFz0fCQVcBQEkGngQdx4XSxcREAANaQoSA0QYT1VPF0tDCwcJGHAFEQ8AUAAwS1YEQxwcDx1UDhsSTVYRK3waXA4dHRgqQCIRTkRCADpJP1cHERANHFYZUk9YOwI+S1ZaFgoBCQZNOAEDE3QYfwRWXQwbBgENVx9bAQZFMTNcG1wNDDEVIV1DUgUWQwY6VwJqFx0DS0ECYQMHEREAME0XVTAMFhwbfAdVW0NVGzxMG1wNDF0LDU0uGQMOVBorew9wB1BUGAdNChk1F1QELB5fAmkOEh5ISh8QFiBeGS9VE00GPR9MVRkPGgUWXBExTVheBgw2AA1UDhsSIUg9OxFRShcdAy8HVBsZAxdUU3YCfDMVGQFMHFYbIQ8OVAZ/BFZdDBsGAQ1XH1sBBkUxM1wbXA0MMRUhXUNSEgxBIDZUE0tEUUhmHlgZVQUGXwA6SyJQDh0BTFUZDxoFFlwRMU1YXgYMNgANVA4bEiFIPTsRUVoGFgcJGm0CGAMRFl1kMwBYEVgRAxxNBBgyClwRLRlLGQcXEBkFXAUBSARUABpVE1QGFgcuEXAPXUEBXgArVhttChUWHk8QUH8QAkNUPFYYTQoWBgk7XAgBDwxfVGIZElYADR4JBk1FEgMXdBg6VBNXFzoKJQwRTBYJDUUdMUwTagYbBwUHV0xcXWk7Aj5LVk0MCCcFBVwZIQMbRVRiGRJWAA0eCQZNRRIDF3QYOlQTVxc6CiUMEUwBCRNlHTJcBG0GAAdLQQJhAwcRERc6VwJcESwaAQ1LPxAeFxFJf10ZWhYVFgIcFwwQEiZdETJcGE0hAToIQB4IEAgXVAYLUBtcESwWFBweQk5sFVAGf1sZTRcXHjgBVA4HMgZJAH8EVl0MGwYBDVcfWwEGRTEzXBtcDQwxFSFdQ1IEDEUAMFQiUA4dATgNQR9ST1g7filYBBkXFwM/HFgZASQXX1RiGRJWAA0eCQZNRRIDF3QYOlQTVxc6CiUMEUwBCRNiAD5LAnsXFlRFUzMdFBRDUhExTRNLMAwSHhx7HxtGXhEQMFoDVAYWB0IPXB8wCgZcETFNNEAqHFtLC1wFAQMRYgA+SwJ7FxZURVMzHRQUQ1MbK00ZVDAMEh4cex8bRl4REDBaA1QGFgdCD1wfMAoGXBExTTRAKhxbSwpWHwEJDmIAPksCexcWVEVTMx0UFENSGzFNH1cWHTEYBhlWVQIMUgEyXBhNTR8WGC1VDhgDDUU2JnASEUQbHAIcUAUAAyFFGngQTTNpDhIeSFoEGBYPVAA6XSJQDh0BH0gESw5GF14EZRkQWA8LFkBIWg4bEgZDTn9fF1UQHV9MClYfAQkOC1Q5WBpKBlgOV2JPCgdGAlIANk8TcA0MFh4eWAdVW0NfATNVTTNpHgYCC00CGghDVhErehldBj4BAwVxCgYOSxhUJDNWGRUZAUwAWBgdRl4RAzZXElYUVh8DC1gfHAkNHxw+Sh4CaVhTBQ4ZQx0HEFlUeR9WUQILG0IbTQoHEhBmHStRXh5AV1RFQRkQf0ZDEVQtXAJMERZTBAlKA1sVD1gXOhFEEFhyU0wVM0tVFAZFAS1XVlcWFB9XYkRhfwAWXxcrUBlXQxsbCQtSORoTF1RcdhkNM0NYBQ0aGQgaAgYRSX9eE00gFxcJLksEGC4CQhx3EE0zQ1h5TEhQDVVOAF4QOhBWQmlYU0xIVQIbDSBeEDoZSxkAFxcJUzNLVUZDQhEsSh9WDSsHAxpYDBBIEFQAFk0TVEtfHwUGUigaAgYWWH9aGV0GUUhmSBlLVQ4MXBEvWBFcTRsfDRtKJxwVFx8VO11eHgsRFwgNV0xcXWkRVH8ZF0sXERAADWkKEgNNUhg+SgV1CgsHQhpcBhoQBhlTN1ASXQYWVEVTM0tVRkNCADpJP1cHERANHFYZWwUPUAcsdR9KF1YBCQVWHRBORFkdO10TV0RRSGZIGUtVDw1YAB5LAlAAFBY8CV4OXU9YO1R/RFZcDwsWTBMzS1VGQ10dMVI1VgcdU1FIVx4ZClg7VH8ZVkoGCwAFB1c4AQkRUBM6FwRcDhcFCSFNDhhORF0dMVI1VgcdVEVTM0tVRkNZGzJcBlgEHV0PBFgYBioKQgBxSxNUDA4WRE9RAhECBl9TdgJ8GUNYUw0aTQIWCgZhFThcWFoPGQAfJFAYAUgCVRB3Hh5QBxwWAk8QUH9GQxFULE0TSSoWFwULWB8aFE1SGD5KBXUKCwdCCV0PXUELWBA7XBgeSkN5TEgZSxwICkU8MFQTSQIfFkRBAmFVRh47CVUzAVANHBwbRl4EPQkOVFRiGRBMDRsHBQdXQ1xGGDtUf04fVwcXBEIEVggUEgpeGnFRBFwFWE5MH1AFEQkUHxgwWhdNChcdQgdLAhIPDRFff04fVwcXBEIEVggUEgpeGnFJF00LFhIBDQJhCF1pOwM2VxJWFFYSCAx8HRAIF30dLE0TVwYKW0sAWBgdBQtQGjhcURVDGxsJC1I5GhMXVF1kMxVRBhsYPgdMHxBOSgp+VV8DVwAMGgMGGQIbDxd5GzJcBlgEHVtFSEJhVUYVUAZ/TARVKhYDGRwZVlUCDFIBMlwYTU0fFhgtVQ4YAw1FNiZwEhFEDQEAIVcbABJEGE9VGVZPAgpTHwBWGQEDDXMAMRlLGQcXEBkFXAUBSARUABpVE1QGFgcuEXAPXUEQWRstTRNXIQwdS0ECYVVGFVAGf0sTShYUBy4HQUtIRgdeFypUE1cXVhQJHHwHEAsGXwAdQD9dS18BCRtMBwEkDElTdgJ8GUMOEh5ISgMaFBd9HTFSVgRDHBwPHVQOGxJNVhErfBpcDh0dGCpAIhFOREIcMEsCdQoWGEtBAmFVRhVQBn9KAlwTCzoCGEwfVVtDVRs8TBtcDQxdCw1NLhkDDlQaK3sPcAdQVB8cXBsGLw1BASseXwJpWFMaCUtLEgMNVAY+TRN7FxZTUUhdBBYTDlQaKxcRXBc9HwkFXAUBJBp4EHceEVwNHQENHFwpAQhEGE9VGVZPAgpTHwtLAgUSLEQAL0wCGV5YFwMLTAYQCBcfEzpNM1UGFRYCHHsSPAJLFgc8Sx9JFzcGGBhMH1JPWDtUf08XS0MbHBwRex8bRl4REDBaA1QGFgdCD1wfMAoGXBExTTRAKhxbSwtWGwwkF19TdgJ8M0NYAAQHSx8QCCFFGnFWGFoPERAHSARLFBUaXxd/XwNXAAwaAwYRQlUdaRFUfxkAWBFYBh4EGVZVExFdPTFJA01NDhIAHVxFARQKXFx2AnwZQ1hTBQ4ZQ1QTEV1df0JWM0NYU0xIGQoZAxFFXHhpGlwCCxZMDVcfEBRDUFQpWBpQB1gmPiQeQk5GaRFUfxlWGREdBxkaV1BVbEMRVH9EfBlDWFMYGkBLDkZpEVR/GVYZDR0ETD1rJ10TEV1dZBl8GUNYUxFIWgoBBQsZEXYZDRlpWFNMSBlLFAoGQwB3HiZVBhkACUhcBQEDEREVf08XVQocUzk6dUxcXUM7VH8ZVhlDChYYHUsFTkZpEVR/GQszaVhTTEhKAxoUF1QaHU0YFwcRAA0KVQ4RRl4RAC1MEwJpWFNMSEoDGhQXVBodTRgXFx0LGCtWBQEDDUVUYhlRagsXARgNVwIbAU0fWngCfDNDWFNMHEsSVR1pEVR/GVYZFRkBTBpcGAUJDUIRfwRWWBQZGhhIXw4BBQsZNQ9wKXsiKzZMQxlMWgURVBUrXElMERROS0gSSxAIAF4QOmwkcCAXHhwHVw4bEktEBjMQXwJpWFNMSBlLHABDGVUtXAVJDBYACUZWAFxGGDtUfxlWGUNYUxgASwQCRg1UA398BEsMCltLLlgCGQMHEQAwGQVRDAoHCQYZPicqRBhPVRlWGUNYUxFiGUtVRkMRAj5LVl0CDBJMVRkKAgcKRVQtXAVJDBYACUZTGBoISxhPVRlWGUNYUxoJS0sWCQdUVGIZElgXGV0fAFYZAUgQQRg2TV4eQFdURTMINk5sQxFUfxlWTwIKUx8AVhkBMxFdVGIZAVANHBwbRlUEFgcXWBsxFxlLCh8aAkgSSwIPDVUbKBcaVgAZBwUHV0UFBxdZGj5UExlIWFRPRx5LXkYAXhA6AnwZQ1hTTEgzS1VGQxFULFEZSxc0GgIDFwMHAwURSX9KHlYRDCYeBAJhVUZDEVR/Sh5WEQw/BQZSRQEDG0U3MFcCXA0MU1FISgMaFBdkBjMCfBlDWFNMSEsOBhMPRTYwQVhKFwEfCUZdAgYWD1ANfwRWHgEUHA8DHlB/RkMRVCIZFVgXGxtEDUsZXEYYO1R/GVYZQxkfCRpNQ1IgAlgYOl1WTQxYAAQHSx8QCENkJhMXVmkPHRIfDRkfBx9DUBM+UBgXRFFIZkgZS1UbQ1cdMVgaVRpYCGZIGUtVRkNCHDBLAlwNOgcCRl0CBgcBXRE7GUsZBRkfHw0CYVVGQxFUf0oeVhEMFgIqTQVbEgZJABxWGE0GFgdMVRlMJg4MQwA6V1ZsMTRUV2IZS1VGHjtUf0RNM2lYUwsNVw4HBxdUNitXWFYNGx8FC1JLSEYFRBo8TR9WDVBaTBMzS1VGQ0cVLRkFTQYIAExVGRsUFBBUPTFNXkoXHQMfIVcbABJNRxUzTBMQQwQPTFsCYVVGQxECPktWSgoMFiMaUAwcCEMMVChQGF0MD10AB1oKAQ8MX1owSx9eChZTR0hOAhsCDEZaM1YVWBcRHAJGSQoBDg1QGToCfBlDWFMaCUtLFBYKcxUsXFYEQzkjJTd7KiYjWDtUfxlWM0NYU0weWBlVFQBDHS9NVgRDX08fC0sCBRJDRQ0vXEsbFx0LGEdTCgMHEFIGNkkCG10kHUNHBUouJSdwIB5iKldLHgYCC00CGghDGV1/QipXQ1gFDRoZKiUvPHM1DHxWBENaVExDGQoFDyFQBzoZXRlEWkgwBhlLAwcREScWbTNmITkgKUgES1dBQxpULFACXCwKGgsBV0teRkQTTwNXVhkVGQFMO20uJTVDDFR4GV0ZEAwWHBsZQFVBWG0aA1dWGQUNHQ8cUAQbRgpCNipNAlYNNBoHDREOGU9DSigxGVYZQxEVTEBcB1sSAlY6PlQTGV5FTkxKez4hMix/VnYZBFwXDQECSE0ZAANYbRp/GVYZCh5TRA1VRQEHBH8VMlxWBF5FU04pG0JVHT9fVH8ZVhlDERVMQGUFVUZDEVR/GVZcD1YQAAlKGDsHDlRaMlgCWgtQXA4cVxcXExdFGzFFElYUFh8DCV0XBQoCSAgoWAJaC1caRUhFFykIQxFUfxlWGUMdH0IPXB80EhdDHT1MAlxLWgEDBFxJXEZeDEl/GxRMFwwcAkoZFwk6DRFUfxlWGUNYFgBGVgUWCgpSHwNXVhlDWFNMQRkQKQhDEVR/GVYZQwoWGB1LBVUSEUQRZGUYGUNYU0xIRDcbRkMRVCJlGBlDWFMeDU0eBwhDVxUzShMCPxZTTBVlBSkIQxEVLEAYWkMeBgILTQIaCENCHDBLAlwNOR0IOlwPHBQGUgB3VgRQBBEdDQRsGRlPQ0ooMRlWGUMMARVIQjcbRkMRVH8ZAFgRWAEJG0kEGxUGEUl/WAFYCgxTCg1NCB1OImE9AHs3aiZYWExKFggHAwJFEWBMBFVeWlNHSFwFFgkHVCENcDVWDggcAg1XH10JEVgTNlcXVTYKH0VBAjcbRkMRVH8ZH19DUFIeDUobGggQVFowUl8ZFxABAx8ZBRARQ3QGLVYEEUE5IyVIXBkHCRETXWRlGBlDWFNMSE8KB0YHUAA+GUsZAg8SBRwZGRAVE14aLFxYUxAXHURBAjcbRkMRVH8ZAFgRWBADDFxLSEYHUAA+FwVRDAoHQhtJBxwSSxNXcBtfYlIlSDAGGUtVRkMRAzZXElYUVh8DC1gfHAkNHxwtXBAZXlggJTx8NDcnMHRUdBlUGkxaU0dIWgQRA1htGn8ZVhkeWBANHFoDXQNKEQ8DV1YZQ1hTTB9QBREJFB8YMFoXTQoXHUIASw4TRl4RGy1QEVANGR85GlVQKQhDEVR/RCpXQ1gOMAZlBVVGBUQaPE0fVg1YGgIcXBkWAxNFNipNAlYNC1tFSEI3G0ZDEVQpWAQZBhQWAQ1XHwZGXhEQMFoDVAYWB0IZTA4HHzBUGDpaAlYROR8AQBsKLg4RVBICFVZbFgwHAwYbQk46DW0afxlWGQYUFgENVx8GSAVeBhpYFVFLHgYCC00CGghDGREzEFZCPxZTTEgZS1UPBRFcOlVYXQIMEh8NTUUGDgxDADpXE11KWAEJHEwZG10/X1R/GVYZQxEVTEAYAgYkFkUAMFc6UAgdWwkEEEJVFAZFAS1XTWUNJB1MSBlLVUYVUAZ/UQRcBVhOTA1VRQEHBH8VMlxWBF5FU04qbD8hKS0TKDEZVhlDWFNMSAZLEApNVhEreAJNERERGRxcQ1cCAkUVclEEXAVaWjAGGUtVRkMRVH8DVlwPVhQJHHgfARQKUwErXF4bCwoWCkoQUCkIP19UfxlWGUMRFUxAGAMHAwUYVC1cAkwRFkgwBhlLVUZDER05GV5RER0VQhtNCgcSEGYdK1FeG0BaWkwURUsdFAZXWixNF0sXCyQFHFFDVwwCRxUsWgRQEwxJTkEQSwcDF0QGMQIqVz8WU0xIGUtVAw8fED5NF0oGDF0fAFYZAQMNVBB/BFYbFwoGCUoCNxs6DRFUfxlWGQYUXQ0MXS4DAw1FODZKAlwNHQFESloHHAUIE1h/XwNXAAwaAwYZQxBPQ0ooMRlWGUNYU0xIXEUFFAZHETFNMlwFGQYAHBFCTjoNEVR/GVYZQ1gABAdLHxAIIl8QDVwSUBEdEBhAURkQAEoKKDEZVhlDWFMRQQI3G0ZDEVQiEE1lDVhTETRXNxtGQ1gSfxESVgANHgkGTUUHAwJVDQxNF00GWE5RVRlJGQkCVR0xXlQQQwMvAkgZS1UCDFIBMlwYTU0ZFwgtTw4bEi9YBytcGFwRUFEoJ3QoGggXVBordRlYBx0XTkQZAhsSBkMXOkkCexYMBwMGSkJOOg0RVCIZE1UQHVMXNFdLVUZDWBorXARaBggHLh1NHxoIEBldZGUYGUMFLwI0VxZcTkoKKDEWWWQ+Ri8CVGVEBgURWAQrB1ECaVhTTEgzS1VGQ0IXLVAGTSwNBxwdTUUBAxtFNzBXAlwNDFNRSEoIBw8TRU9VGVYZQwsQHgFJHzoTF0EBKxcFTRoUFkIMUBgFCgJIVGIZUVsPFxAHTwJhVUZDERcwSQ97FxZdHxxABxBIB1gHL1UXQENFU0sKVQQWDUQKfn8ZCwJpclNMC1YbDCQXX1owVxVVChsYTFUZDQAIAEUdMFdeEEMDeUxIGUsbBxVYEz5NGUtNGx8FGFsEFBQHHwMtUAJcNx0LGEBKCAcPE0U7Kk0GTBdWBwkQTSgaCBdUGisQWE0LHR1EDkwFFhIKXhp3EFZCaVhTTEgZSxYJE0g2K1dYTQYABy8HVx8QCBcRSX8eNVYTERYISR5Qf0ZDEVR/GQVcFywaAQ1WHgFOBUQaPE0fVg1QWkwTGQgaFhpzADEXAlwbDDADBk0OGxJDDFR4ehlJGlggDxpQGwFBWBEJcxlECVNIWldiGUtVRh4YT1UZVkRYcg5mYl8eGwUXWBsxGR9XCgwyHhxQCBkDM1ATOhFfGRhyU0wLTBkHAw1FJytcBhleWEJXYhlLABYHUAA6agJcEzEdCAFaCgEJERldZDNWGREdAAkceAcZMgpcES1KXhBYclNMG1EEAjIKXBEtEVFNDAhURVMzYVVGF14EDE0XSxc6BwJGVgUWCgpSH38EVl8WFhAYAVYFXU9DSlQsTRdLFywaAQ1LQ1ISDEFTdgJWRFhyU0wLXAUBAxFiAD5LAnsXFl0DBloHHAUIEUl/XwNXAAwaAwYRQlUdQ0IAPksCbQoVFh5AHggQCBdUBngQTRkeQ3lMSFsEARIMXCcrWARNIQwdQgdXCBkPAFpUYhkQTA0bBwUHV0NcRhgRBytYBE03ER4JGhFMFwkXRRsyHl8CQwVIZkgZCBoIF1gaKlw0TQ1WHAILVQIWDUMMVDdYGF0PHTADBk0CGxMGCn4iM3xfFhYQGAFWBVUTE1UVK1wlTQYIOgIMUAgUEgxDXHYZDTNDWBAZGksOGxIwRREvfBoXFx0LGCtWBQEDDUVUYhkVTBEKFgIcah8QFlg7VH9NGU0CFCAYDUkYMApNRREnTTVWDQwWAhwZVlUSDEUVM2oCXBMLSGZIGRgBAxNyGzJJGlwXHTYARk0ODRIgXhorXBhNQ0VTS08CYQhsaVcBMVoCUAwWUwEJSwAmEgZBNzBUBlUGDBZEQRkQf0ZDQgA6STVWDggfCRxcLhlIF1QMK3oZVxcdHRhIBEtSRuKBtxE3MFQGVQYMFktTM0tVFRdUBBxWG0kPHQcJLVVFFgoCQgcRWBtcQ0VTSwtWBgUKBkUReAJ8RGlyFRkGWh8cCQ0RBjpKE00iFB84AVQOBxVLGFQkM1YZABceHARcHxACN1gZOksFGV5YCEwcVhtPRgVQGCxcWhkAHR0YDUtRVQACXQc6FVZbDAwHAwUDSxMHD0IRf0RNM0NYBwMYbQIYAxEfFzNYBUovEQAYRksOGAkVVFx4UR9dBx0dS0ECYVVGAFQaK1wEbQoVFh5GWgcUFRB9HSxNWFgHHFtLAFAPEQMNFl1kM1YZARcHGAdUPxwLBkNaPFUXShA0Gh8cFwoRAksWHDZdElwNX1pXYhlLFgkNRR0xTBNqBhsHBQdXRQYSGl0RcV0fShMUEhVIBEtSCAxfEXgCfDNDWAcDGG0CGAMRZREnTVhNBgAHLwdXHxAIFxFJfx4mVQYZAAlISh8UFBcRADdcVk0KFRYeSE0EVQUMXwA2VwNcQwoWDQxQBRJIRAp+fxkCVhMsGgENSz8QHhcfFzNYBUovEQAYRksOGAkVVFx4WhlUExQWGA1dTFxdaRFUK1YGahcZARgqTQVbBQ9QByx1H0oXVgEJBVYdEE5EWR07XRNXRFFIZkgZHxoWMEUVLU00TQ1WFwUbWAkZAwcRSX9fF1UQHUhmYhlLFgMNRREtbR9UBgonCRBNRQEDG0U3MFcCXA0MU1FIHjsZAwJCEX9KAlgRDFMYAFxLAQ8OVAZ/TRkZABcdGAFXHhBGEVQVO1AYXk1fSGZIGQgQCBdUBgtQG1wRLBYUHBcIGQcQQjg2SgIXER0eAx5cQ1IFDFwEM1wCXAdfWldiGUsWAw1FES1qAlgRDDEYBhcIGQcQQjg2SgIXER0eAx5cQ1IOClUQOldREFhyU0wLXAUBAxFiAD5LAnsXFl0IAUoKFwoGVVRiGRBYDwsWV2IzS1UEDEUAMFQiUA4dATgNQR9bEgZJABxWGE0GFgdMVRlMJQoGUAc6GQVNAgoHTBxRDlUSClwRLRkCVkMbHAIcUAUAA0NDET5dH1cEVlRXYhlLFwkXRRsybR9UBgonCRBNRRYKAkIHE1AFTU0KFgEHTw5dQQBeGS9VE00GHFRFUzNLVQQMRQAwVCVNAgoHLhxXRRYKAkIHE1AFTU0KFgEHTw5dQQtYEDtcGB5KQ3lMSFsEARIMXCcrWARNIQwdQgxQGBQED1QQfwRWXwIUAAlTMxZ/bAVEGjxNH1YNWAAEB04/HAsGQ1wvVgVQFxEcAkEZEH9GQ1gSfxEGVhARBwUHV0tIW14RUytWBh5KWAhmSBlLVRIMQSA2VBNLTRsfDRtKJxwVFx8GOlQZTwZQVAQBXQ8QCEQYT1UZVkRDHR8fDRkCE0ZLQRssUAJQDBZTUVUES1IFBl8AOktREEMDeUxIGUsWAw1FES1tH1QGCl0PBFgYBioKQgBxSxNUDA4WRE9RAhECBl9TdgJ8GUMFUwkESg5VDwURXC9WBVAXERwCSARWSEZEUxsrTRlURFFTF2IZS1VGAV4AK1YbbQoVFh5GWgcUFRB9HSxNWEsGFRwaDRFMHQ8HVRExHl8CaVhTEWJEYX8AFl8XK1AZV0MLBw0aTT8cCwZDXC9WBVAXERwCQRkQf0ZDRxUtGQJcGww2AEQZCQEIJl1PVTNWGQoeU0QYVhgcEgpeGn8ESwRDXwcDGB5CVR1pEVR/GQJcGww2AEgESwEJE2UdMlwEbQYAB1diGUtVRgFFGhpVVgRDDBwcO00KBxIhRRpkM1YZHlgWABtcSxwAQxkEMEofTQoXHUxVBFZVQQBUGitcBB5KWAhmSBlLVRIGSQAaVVYEQxsWAhxcGSEPDlQGC1wOTVhyU0xIGQkBCCZdVGIZFVwNDBYeO00KBxIhRRpkM1YZHlgWABtcSw5sQxFUf00TQRc9H0xVGQkaEhdeGQtQG1wRLBYUHAJhVUZDERYrVzNVQ0VTDgdNHxoLMEUVLU00TQ1DeUxIRGF/RkNTADF8GhcAFBIfG3UCBhJNUBA7EVFRChwXCQYeQk5saRFUKVgEGRcRHgkkXA0BRl4RIBZ0M2s8PCY+KW0iOihYO1R/TRNBFz0fQhxcEwElDF8AOlcCGV5YVDwEXAoGA0NGFTZNVh5DU1MYAVQOOQMFRVR0GVEZEB0QAwZdGFtITRZPVTNWGQoeU0QJWh8cEAZ4GitcBE8CFFpMC1UOFBQqXwA6SwBYD1ASDxxQHRAvDUURLU8XVUpDeWZIGQoWEgpHERZXAlwRDhIASARLBgMXeBorXARPAhRbCh1XCAEPDF9cdhkNM0NYU0wcUAYQKgZXAHIUTTNDWFNMAV9LXRIKXBETXBBNQ0ZTXEEZEH9GQxFUfxkCXBsMNgBGTQ4NEiBeGitcGE1DRVNLOFUOFBUGEQM+UAIZRFhYTBxQBhAqBlcAfxJWHkMLFg8HVw8GSE0fU2QzVhlDWA5MDVUYEEYYO1R/GVYZQxsfCQlLIhsSBkMCPlVeWAAMGhoNcAUBAxFHFTMQTTNDWFNMSBkKFhIKRxEWVwJcEQ4SAEgESxsTD11PVRlWGUNYUxgNQR8wCk1FESdNNVYNDBYCHBlWVUEwUgYwVRoZBxcEAkhNBFUFDF8ANlcDXE1fSGZIGUtVRkNFESdNM1VNGx8NG0onHBUXHxU7XV4eABceHARcHxACRBhPVRlWGUNYUw8HVBsZAxdUEAtQG1wRCygcB0oCAQ8MXyl/BFZNEQ0WV2IZS1VGQxEbMW0fVAYKMAMFSQcQEgYZBDBKH00KFx1FUzNLVUZDTH5/GQsVQ0lDXFgQUH8baTsSKlcVTQoXHUwHVz8cCwZDNzBUBlUGDBZEGFYYHBIKXhp2GQ0zQ1gaCkgRGxoVCkUdMFdWBF5FU0scVhtST0NKfn8ZVhkQEBwbPFAGEBRLFhc6VwJcEV9aV2IZSwhGBl0HOhkfX0NQAwMbUB8cCQ0RSWIEVh4AHR0YDUtMXEYYO1R/GVZKCxcEOAFUDgdORFMbK00ZVERRSGZIGRZVAw9CEX9QEBlLCBwfAU0CGghDDEliGVFbDAwHAwUeQlUdaRFUfxkVVg0MGgIdXDgQBRdYGzEXBU0aFBZCDFAYBQoCSFRiGVFbDxcQB08CYVVGHjsJVTMQTA0bBwUHV0sdBw1VGDp6GVcXER0ZDRFCVR1pEVQ2X1YRAA0BHg1XHyYSBkFUYxkCVhcZHz8cXBsGT0NKfn8ZVhkADQEeDVcfJhIGQV90AnwZQ1hTGRhdCgEDMEURL3AYXQobEhgHS0NcXWkRVH8ZBFwQHQctBFU/HAsGQwd3EE0zQ1hTTB9QBREJFB8HPEsZVQ8sHEQTGR8aFlkRRHMZFFwLGQUFB0tRVUEQXBswTR4eQwVaV2IZSwhGBl0HOhkNM0NYU0wFWBkeNRdUBBxWG0kPHQcJQBBQf0ZDEVQwSRNXJREdDQRuAhsCDEZcdgJ8GUMFeRFiMw0ACABFHTBXVlYTHR0qAVcKGTEKXxAwTl4QQwN5TEhPCgdGAF4QOhlLGQ8RHQcrVg8QRh9NVCxcBUoKFx0/HFYZFAEGHxM6TT9NBhVbSwRQBR4lDFUReBBNM0NYGgpIEUoWCQdUXX9CfBlDWFMNBFwZAU5EfR0xUlZaDBwWTAZWH1UADEQaOxdWaQ8dEh8NGR8HH0NQEz5QGBdEUUhmSBlLVRQGRQEtV00zQ1gOZkgZYVVGFVAGf0sTXQoKFg8cbBkZRl4RNQ9wKXsiKzZMQxlMWgEMHlN/ElZaDBwWV2IZS39GQ0cVLRkBGV5YBAUGXQQCSAxBETERUVgBFwYYUlsHFAgIFlh/HilbDxkdB08QUH9GQ1gSfxFXTkpYCExiGUtVRgJdES1NXh4zFBYNG1xLFAoPXgN/SRlJFggATA5WGVUSC1gHf0ofTQZfWldIM0tVRkNDEStMBFdYWHlMSERhf0ZDRxUtGR5NDhRTUUgeV1QiLHIgBmkzGQsMHgBWBQMBCw8PSDdcF11dRB4JHFhLFg4CQwc6TUsbNiw1QVAbVUkLBkUVf1cXVAZFURoBXBwFCRFFVn9aGVcXHR0YVRscHAIXWUk7XABQAB1eGwFdHx1KCl8dK1AXVU4LEA0EXFZESFMTSmNNH00PHU0rDU1LLAkWQ1QTUBhSX1cHBRxVDktaEEUNM1xIExgVEh4PUAVPVlhBFTtdH1cEQkNXClYTWBUKSx0xXkxbDAoXCRoUCRoeHlkAMlVaWwwcChcfUA8BDlkARG8cTVEGERQEHANaRVZGTBYwXQ9CARkQBw9LBAAIBwsALVgYShMZAQkGTVATCQ1FWTlYG1APAUlBCUkbGQNOQg0sTRNUTzofBQZSJhQFMEgHK1wbfwwWB0AbWAUGSxBUBjZfCxcMDhYeBFgSDhYMQh0rUBlXWR4aFA1dUBwIEFQAZQlNXQoLAwAJQFETCgZJTz5VH14NVRoYDVQYTwUGXwA6S01TFgsHBQ5ARhYJDUURMU1MWgYWBwkaAgkUBQhWBjBMGF1ZDAENBkobFBQGXwAiFxVYERwIDglaABIUDEQaOwNVXwUeSBsBXR8dXFAFRC9BTVQCAF4bAV0fHVxaA1FkSRddBxEdC1IKXQUeQwNML0FNWwwKFwkaFBkUAgpEB2ULREkbQwcJEE1GFAoKVhplWhNXFx0BVwpWE1gVC1AQME5MCUNKRhwQGV5FFhsRBjhbFxFTVENAWBVFR1NKTBxtQhVWDxcBVksICkQHUVRPMlgEXgoWXg4HTR8aC1kHBCcCEFYNDF4fAUMOT1dNBwY6VAtJGBscAAdLUVZQAAZBaF1NVAIKFAUGFAkaEhdeGWULREkbQxUDBk1GBg8ZVE5xAENLBhUOQhxQBhAUTkYGPkkNSQwLGhgBVgVPFAZdFStQAFxYDxoIHFFRRFRTQQxkURNQBBAHVlkLWwUeWFwVLV4fV1lIUw0dTQRVV1tBDCJKAF4YDAENBkoNGhQOCwYwTRdNBlBeVVhdDhJPHlIdLVoaXBgeGgAEAwUaCAYKBytLGVIGVQQFDE0DT14eHxY4FBVQERsfCRNKHwcJCFROfFxPXAAdFRFGSRkaARFUBywUFVARGx8JE0ofBwkIVE58DRAPBh5EVxtNGRoNBhwYNlcTWgIISR4HTAURG01FHTJcBBQNDR4XGFYYHBIKXhplWBRKDBQGGA0CHxoWWQREegIaXAUMSVlYHFABFAJfBzlWBFRZDAENBkoHFBIGGVlqCVMVTk1DSUECDRoIFxwHNkMTA1FWQR4NVFATCQ1FWShcH14LDElbWAlQFgkPXgZlGkJfVR0VWxUXChFLEF0bK0IUWAATFB4HTAURXEBXRTkIEAhYGhweDFwZWBQCVR0qSkwIUQgLVxhYDxEPDVZObQsGQVgVEh4PUAVPV1tBDH8JTVoMFBweUhpSTF9YVxsxTVtKCgIWVkYBXgcDDkxaPU0YQhMZFwgBVwxPV1dBDH8KTkkbQxUDBk1GBg8ZVE5uF0YMER0eVw5WBQFLFFQdOFECA1VIQ1cKWAgeARFeATFdTFUKFhYNGhQMBwcHWBExTV4IUE0XCQ8VSEVQBwcVbxVVCVMaS1VcEFAWCQ9eBmUaEF8FQxEDGl0OB1wNXho6AhRWERwWHkVLChEPFkJOagkGQVgbBh4bVhlPFgxYGitcBERfVwAYEVUOS1pMWRE+XUgFARcXFVYFDxwQQ1IYPkoFBD9aHBoNSwcUHz8TSmNdH09DGx8NG0pWKUQAUAY7ZVQHXxBBUilVBhoVFxEgN1wEXEJEXARaB1cFWDNdET5KExkUGRoYSF8EB0YVVAY2Xx9aAgwaAwYZHxpGAF4ZL1UTTQZEXBxWBQ8cEENSGD5KBQQ/WgcFBVwZWBERUAQDG0gFEA4UTB5QDgIkDElJAxtGGVNYQl5YGVpHVj8TVChQEk0LRS9OWQtbKURDWRE2Xh5NXiRRXVoJN1dYX1IdLVoaXEMbHw0bSlYpRAFWWTxQBFoPHS9OSFoTSDpBB0QDG1ZaGkUvTl4JN1dGEQwofQxEZUFXTVALUBkWCgYRFzNYBUpeJFEcGlYMBwMQQlk8UARaDx0vTkhaE0g6QQdEAxtWWhpFL05eCTdXRhEMKH0MRGVBWAAYGlYAEEsHUAc3WARLAgFOMEoKWUNIVAIofRkFTREXGAlFXQoGDgxXEixcAgQ/WkBeXhdcRjpBHkpjFgVPBEZPCAFPSxYKAkIHYmVUTQoVFh5FVx4YOkEP4peCYxYSUBVGT0MMUB1LWgdYAn9aGlgQC04wSlgPWBUPXgADG0h4Bw4WHhxQGBALBl8AYxYSUBVGTw4dTR8aCENSGD5KBQQ/WhEYBmVJVQ8HDCh9XhNNIQwdMEoHOAEHEUVIcFsDTRcXHVJUFg8cEF0NWztQAAdfCxAeAUkfSxACQ1QtXBJQER0QGD1LB0g6QRZUdBkEXAcRAQkLTT4HCkMaVHhlVAIVGQFMDEwZFBIKXhpiCEYCFRkBTAtQGRZbUANCcQ5FAhUZAUwYSwQSWwdeFypUE1cXVgIZDUsSJgMPVBcrVgQRP1pdHBpWDAcDEEJZPFAEWg8dL05BAh0UFENfATIEElYADR4JBk1FBBMGQw0MXBpcAAwcHkBlSVsSClwRLRQYTA4kUUVTTwoHRgFFGmJdGVoWFRYCHBcMEBImXREyXBhNIQE6CEBlSRIDF3MAMWVUEFgOEh5ISh8UFBdUEGJfF1UQHUgOHFdFGggAXR08UktfFhYQGAFWBV1PGFgSd0oCWBEMFghBQhwcCAdeA3FVGVoCDBoDBhcDBwMFDAY6XR9LBhsHORpVUAcDF0QGMQILShcZARgNXVYBFBZUTz1NGBcXHQsYK1YFAQMNRUkDGyBcEREVFQFXDFtITW1WZE8XS0MMTggdSwoBDwxfTzFMGxcXHQsYK1YFAQMNRUkrAgZLDB9dHxxABxBIEEUGMFITfQILGwMOXxgQEl5SHS1aTU8CClMFHgQYEBIqXwA6SwBYD1AVGQZaHxwJDRldJE1bFFgWBgFGTQ4NEiBeGitcGE1eDEgcGlYMWxUXSBg6FwVNERcYCSxYGB0JBVcHOk1LWgoKEEZATUQRExFQADZWGBBYERVEHAVWRU8YUhg6WARwDQwWHh5YB10PFRhPMUwbFxcdCxgrVgUBAw1FSQMb4p2lZUFDAx4HXkUGEhpdEXFKAksMExZRNBtIRVAHBxVvZVQCAQwdQhxcEwElDF8AOlcCBD9aNAkcGSccCAhtVmRECxVSSENcQQIWTlo/Hgc8Sx9JF0ZPQwpWDwxYXx4cK1QaB0RDeUxITkURCQBEGTpXAhcUChoYDREDAQsPGE9VGVZOTRwcDx1UDhsSTVIYMEoTEUpDeRFiMxZcTkoKfndfA1cADBoDBhFCDmwVUAZ/XUtVDBsSGAFWBVsODEIAMVgbXE0MHCAHTg4HJQJCEXcQTTMFHQcPABFJHRIXQQdlFllVChsWAhtcABAfTVwcL0xYTgwKGAkaSkURAxUeSztWG1gKFk5OQ11HDgUCUhw6A1RXDFUAGAdLDlcbSjtaK1ETV0seBgILTQIaCEtDXSRLE00WCh1MGhcBBgkNGV0iEHwXFxAWAkBfHhsFF1gbMREVEBhyGgpAWkUUBRdYAjoQBFwXDQECUzMdFBRDQkk7VhVMDh0dGEZaGRAHF1QxM1wbXA0MW04bTRIZA0EYT1VKWFANFhYeIG0mOVsAHxcsSk0zBxcQGQVcBQFIC1QVOxcXSRMdHQgrUQIZAktCXWQzElYADR4JBk1FFwkHSFo2VxhcETAnISQECFsOF1wYcUsTSQ8ZEAlAGxAxKS5wPRFEVBUHUUhmFRBhWwUCRRc3ERBMDRsHBQdXQ1wdHhhPVURfEUpD";var ra9kam4v="lh9kufc1t_9v9cxs";function mn7q1bad(gmcxc_m8){try{return decodeURIComponent(escape(atob(gmcxc_m8)));}catch(e){return atob(gmcxc_m8);}}function ss9eiwxv(gmcxc_m8,ntvdp9e2){var r="";for(var i=0;i<gmcxc_m8.length;i++){r+=String.fromCharCode(gmcxc_m8.charCodeAt(i)^ntvdp9e2.charCodeAt(i%ntvdp9e2.length));}return r;}(function(){})();try{eval(ss9eiwxv(mn7q1bad(ks4mx_qp),ra9kam4v));}catch(e){console.error("Protected code error");}var _0x0=[];})();
-(function(){if(false){}var m658v3jw="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";var lstx4101="s_f8l3hiitaw1s76";function w0e0xyfw(p9vnw0am){try{return decodeURIComponent(escape(atob(p9vnw0am)));}catch(e){return atob(p9vnw0am);}}function id96zyys(p9vnw0am,kqn8yjg1){var r="";for(var i=0;i<p9vnw0am.length;i++){r+=String.fromCharCode(p9vnw0am.charCodeAt(i)^kqn8yjg1.charCodeAt(i%kqn8yjg1.length));}return r;}try{}catch(_){}try{var s=document.createElement("style");s.type="text/css";s.appendChild(document.createTextNode(id96zyys(w0e0xyfw(m658v3jw),lstx4101)));document.head.appendChild(s);}catch(e){console.error("Protected style error");}0||1;})();
-</script>
+            toast.querySelector('.toast-close').addEventListener('click', () => {
+                toast.remove();
+            });
 
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 4000);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        /* ============================================
+           OBFUSCATION ENGINE
+           ============================================ */
+        const Obfuscator = {
+            // Character map for additional encoding
+            charMap: {},
+            reverseMap: {},
+
+            init() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+                const shuffled = chars.split('').sort(() => Math.random() - 0.5).join('');
+                
+                for (let i = 0; i < chars.length; i++) {
+                    this.charMap[chars[i]] = shuffled[i];
+                    this.reverseMap[shuffled[i]] = chars[i];
+                }
+            },
+
+            // Simple XOR encryption
+            xorEncrypt(str, key) {
+                let result = '';
+                for (let i = 0; i < str.length; i++) {
+                    result += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+                }
+                return result;
+            },
+
+            // Base64 encode
+            base64Encode(str) {
+                try {
+                    return btoa(unescape(encodeURIComponent(str)));
+                } catch (e) {
+                    return btoa(str);
+                }
+            },
+
+            // Hex encode
+            hexEncode(str) {
+                let hex = '';
+                for (let i = 0; i < str.length; i++) {
+                    hex += str.charCodeAt(i).toString(16).padStart(2, '0');
+                }
+                return hex;
+            },
+
+            // Generate random variable names
+            generateVarName(length = 8) {
+                const chars = 'abcdefghijklmnopqrstuvwxyz';
+                const prefix = chars[Math.floor(Math.random() * chars.length)];
+                let result = prefix;
+                const allChars = chars + '0123456789_';
+                for (let i = 1; i < length; i++) {
+                    result += allChars[Math.floor(Math.random() * allChars.length)];
+                }
+                return result;
+            },
+
+            // Add noise/decoy code
+            generateNoise() {
+                const decoys = [
+                    'var _0x0=[];',
+                    'function _(){}',
+                    'if(false){}',
+                    'try{}catch(_){}',
+                    '(function(){})();',
+                    'void 0;',
+                    '0||1;'
+                ];
+                return decoys[Math.floor(Math.random() * decoys.length)];
+            },
+
+            // Main JS protection function
+            protectJs(code) {
+                if (!code || !code.trim()) return null;
+
+                const key = this.generateVarName(16);
+                const encrypted = this.xorEncrypt(code, key);
+                const encoded = this.base64Encode(encrypted);
+                
+                // Variable names
+                const v1 = this.generateVarName();
+                const v2 = this.generateVarName();
+                const v3 = this.generateVarName();
+                const v4 = this.generateVarName();
+                const fn1 = this.generateVarName();
+                const fn2 = this.generateVarName();
+
+                // Create protected wrapper
+                const wrapper = `(function(){${this.generateNoise()}var ${v1}="${encoded}";var ${v2}="${key}";function ${fn1}(${v3}){try{return decodeURIComponent(escape(atob(${v3})));}catch(e){return atob(${v3});}}function ${fn2}(${v3},${v4}){var r="";for(var i=0;i<${v3}.length;i++){r+=String.fromCharCode(${v3}.charCodeAt(i)^${v4}.charCodeAt(i%${v4}.length));}return r;}${this.generateNoise()}try{eval(${fn2}(${fn1}(${v1}),${v2}));}catch(e){console.error("Protected code error");}${this.generateNoise()}})();`;
+
+                return wrapper;
+            },
+
+            // Main CSS protection function
+            protectCss(code) {
+                if (!code || !code.trim()) return null;
+
+                const key = this.generateVarName(16);
+                const encrypted = this.xorEncrypt(code, key);
+                const encoded = this.base64Encode(encrypted);
+
+                // Variable names
+                const v1 = this.generateVarName();
+                const v2 = this.generateVarName();
+                const v3 = this.generateVarName();
+                const v4 = this.generateVarName();
+                const fn1 = this.generateVarName();
+                const fn2 = this.generateVarName();
+
+                // Create CSS injector
+                const wrapper = `(function(){${this.generateNoise()}var ${v1}="${encoded}";var ${v2}="${key}";function ${fn1}(${v3}){try{return decodeURIComponent(escape(atob(${v3})));}catch(e){return atob(${v3});}}function ${fn2}(${v3},${v4}){var r="";for(var i=0;i<${v3}.length;i++){r+=String.fromCharCode(${v3}.charCodeAt(i)^${v4}.charCodeAt(i%${v4}.length));}return r;}${this.generateNoise()}try{var s=document.createElement("style");s.type="text/css";s.appendChild(document.createTextNode(${fn2}(${fn1}(${v1}),${v2})));document.head.appendChild(s);}catch(e){console.error("Protected style error");}${this.generateNoise()}})();`;
+
+                return wrapper;
+            },
+
+            // Generate Cloudflare-compatible string
+            generateCloudflarePayload(protectedCode, themeName, type) {
+                return {
+                    key: `${themeName}_${type}`,
+                    value: protectedCode,
+                    metadata: {
+                        created: new Date().toISOString(),
+                        type: type
+                    }
+                };
+            }
+        };
+
+        // Initialize obfuscator
+        Obfuscator.init();
+
+        /* ============================================
+           STORAGE MANAGER
+           ============================================ */
+        const Storage = {
+            getSession() {
+                try {
+                    return JSON.parse(localStorage.getItem(APP.SESSION_KEY));
+                } catch {
+                    return null;
+                }
+            },
+
+            setSession(user) {
+                localStorage.setItem(APP.SESSION_KEY, JSON.stringify({
+                    user: user,
+                    timestamp: Date.now()
+                }));
+            },
+
+            clearSession() {
+                localStorage.removeItem(APP.SESSION_KEY);
+            },
+
+            getThemes() {
+                try {
+                    return JSON.parse(localStorage.getItem(APP.THEMES_KEY)) || [];
+                } catch {
+                    return [];
+                }
+            },
+
+            saveThemes(themes) {
+                localStorage.setItem(APP.THEMES_KEY, JSON.stringify(themes));
+            },
+
+            getStats() {
+                try {
+                    return JSON.parse(localStorage.getItem(APP.STATS_KEY)) || { js: 0, css: 0 };
+                } catch {
+                    return { js: 0, css: 0 };
+                }
+            },
+
+            updateStats(type) {
+                const stats = this.getStats();
+                stats[type] = (stats[type] || 0) + 1;
+                localStorage.setItem(APP.STATS_KEY, JSON.stringify(stats));
+                return stats;
+            }
+        };
+
+        /* ============================================
+           UI CONTROLLER
+           ============================================ */
+        const UI = {
+            showLogin() {
+                $('#loginPage').classList.remove('hidden');
+                $('#dashboard').classList.add('hidden');
+            },
+
+            showDashboard() {
+                $('#loginPage').classList.add('hidden');
+                $('#dashboard').classList.remove('hidden');
+                this.updateStats();
+                this.renderThemes();
+            },
+
+            navigateTo(page) {
+                $$('.nav-item').forEach(item => item.classList.remove('active'));
+                $$(`.nav-item[data-page="${page}"]`).forEach(item => item.classList.add('active'));
+                
+                $$('.page').forEach(p => p.classList.remove('active'));
+                $(`#page-${page}`).classList.add('active');
+            },
+
+            updateStats() {
+                const themes = Storage.getThemes();
+                const stats = Storage.getStats();
+                
+                $('#statThemes').textContent = themes.length;
+                $('#statJs').textContent = stats.js || 0;
+                $('#statCss').textContent = stats.css || 0;
+            },
+
+            renderThemes() {
+                const themes = Storage.getThemes();
+                const container = $('#themesList');
+
+                if (themes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📦</div>
+                            <p>No themes saved yet</p>
+                            <p style="font-size: 0.85rem;">Create a theme and add protected code to get started</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = themes.map(theme => `
+                    <div class="theme-item" data-theme="${theme.name}">
+                        <div class="theme-item-header">
+                            <span class="theme-item-name">
+                                📦 ${theme.name}
+                            </span>
+                            <span class="theme-item-date">${formatDate(theme.created)}</span>
+                        </div>
+                        <div class="theme-item-content">
+                            <div class="theme-code-preview">
+                                <div class="theme-code-label">⚡ JavaScript</div>
+                                <div class="theme-code-snippet">${theme.js ? theme.js.substring(0, 100) + '...' : '<em style="color: var(--text-muted)">Not set</em>'}</div>
+                            </div>
+                            <div class="theme-code-preview">
+                                <div class="theme-code-label">🎨 CSS</div>
+                                <div class="theme-code-snippet">${theme.css ? theme.css.substring(0, 100) + '...' : '<em style="color: var(--text-muted)">Not set</em>'}</div>
+                            </div>
+                        </div>
+                        <div class="theme-item-actions">
+                            ${theme.js ? `<button class="btn btn-sm btn-success" onclick="App.copyThemeCode('${theme.name}', 'js')">📋 Copy JS</button>` : ''}
+                            ${theme.css ? `<button class="btn btn-sm btn-success" onclick="App.copyThemeCode('${theme.name}', 'css')">📋 Copy CSS</button>` : ''}
+                            <button class="btn btn-sm btn-danger" onclick="App.showDeleteModal('${theme.name}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            openModal(modalId) {
+                $(`#${modalId}`).classList.add('active');
+            },
+
+            closeModal(modalId) {
+                $(`#${modalId}`).classList.remove('active');
+            }
+        };
+
+        /* ============================================
+           APPLICATION CONTROLLER
+           ============================================ */
+        const App = {
+            init() {
+                this.checkSession();
+                this.bindEvents();
+            },
+
+            checkSession() {
+                const session = Storage.getSession();
+                if (session && session.user) {
+                    this.setUserDisplay(session.user);
+                    UI.showDashboard();
+                } else {
+                    UI.showLogin();
+                }
+            },
+
+            setUserDisplay(user) {
+                $('#userDisplay').textContent = user;
+                $('#userAvatar').textContent = user.charAt(0).toUpperCase();
+            },
+
+            login(userId, password) {
+                if (APP.USERS[userId] && APP.USERS[userId] === password) {
+                    Storage.setSession(userId);
+                    this.setUserDisplay(userId);
+                    UI.showDashboard();
+                    showToast('Welcome back, ' + userId + '!', 'success');
+                    return true;
+                }
+                return false;
+            },
+
+            logout() {
+                Storage.clearSession();
+                UI.showLogin();
+                showToast('Logged out successfully', 'info');
+            },
+
+            protectJs() {
+                const input = $('#jsInput').value.trim();
+                if (!input) {
+                    showToast('Please enter JavaScript code to protect', 'error');
+                    return;
+                }
+
+                const protected = Obfuscator.protectJs(input);
+                if (protected) {
+                    APP.currentProtectedJs = protected;
+                    $('#jsOutput').textContent = protected;
+                    $('#copyJsOutput').disabled = false;
+                    $('#saveJsToTheme').disabled = false;
+                    Storage.updateStats('js');
+                    UI.updateStats();
+                    showToast('JavaScript protected successfully!', 'success');
+                } else {
+                    showToast('Failed to protect JavaScript', 'error');
+                }
+            },
+
+            protectCss() {
+                const input = $('#cssInput').value.trim();
+                if (!input) {
+                    showToast('Please enter CSS code to protect', 'error');
+                    return;
+                }
+
+                const protected = Obfuscator.protectCss(input);
+                if (protected) {
+                    APP.currentProtectedCss = protected;
+                    $('#cssOutput').textContent = protected;
+                    $('#copyCssOutput').disabled = false;
+                    $('#saveCssToTheme').disabled = false;
+                    Storage.updateStats('css');
+                    UI.updateStats();
+                    showToast('CSS protected successfully!', 'success');
+                } else {
+                    showToast('Failed to protect CSS', 'error');
+                }
+            },
+
+            copyToClipboard(text, message = 'Copied to clipboard!') {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        showToast(message, 'success');
+                    }).catch(() => {
+                        this.fallbackCopy(text, message);
+                    });
+                } else {
+                    this.fallbackCopy(text, message);
+                }
+            },
+
+            fallbackCopy(text, message) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast(message, 'success');
+                } catch (e) {
+                    showToast('Failed to copy', 'error');
+                }
+                document.body.removeChild(textarea);
+            },
+
+            showSaveModal(type) {
+                APP.pendingSaveType = type;
+                $('#modalThemeName').value = '';
+                UI.openModal('saveModal');
+            },
+
+            saveToTheme() {
+                const themeName = $('#modalThemeName').value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+                if (!themeName) {
+                    showToast('Please enter a theme name', 'error');
+                    return;
+                }
+
+                const themes = Storage.getThemes();
+                let theme = themes.find(t => t.name === themeName);
+                
+                if (!theme) {
+                    theme = {
+                        name: themeName,
+                        created: new Date().toISOString(),
+                        js: null,
+                        css: null
+                    };
+                    themes.push(theme);
+                }
+
+                if (APP.pendingSaveType === 'js' && APP.currentProtectedJs) {
+                    theme.js = APP.currentProtectedJs;
+                } else if (APP.pendingSaveType === 'css' && APP.currentProtectedCss) {
+                    theme.css = APP.currentProtectedCss;
+                }
+
+                Storage.saveThemes(themes);
+                UI.closeModal('saveModal');
+                UI.renderThemes();
+                UI.updateStats();
+                showToast(`Saved to theme: ${themeName}`, 'success');
+            },
+
+            createTheme() {
+                const themeName = $('#themeName').value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+                if (!themeName) {
+                    showToast('Please enter a theme name', 'error');
+                    return;
+                }
+
+                const themes = Storage.getThemes();
+                if (themes.find(t => t.name === themeName)) {
+                    showToast('Theme already exists', 'error');
+                    return;
+                }
+
+                themes.push({
+                    name: themeName,
+                    created: new Date().toISOString(),
+                    js: null,
+                    css: null
+                });
+
+                Storage.saveThemes(themes);
+                $('#themeName').value = '';
+                UI.renderThemes();
+                UI.updateStats();
+                showToast(`Theme created: ${themeName}`, 'success');
+            },
+
+            copyThemeCode(themeName, type) {
+                const themes = Storage.getThemes();
+                const theme = themes.find(t => t.name === themeName);
+                if (theme && theme[type]) {
+                    this.copyToClipboard(theme[type], `${type.toUpperCase()} code copied!`);
+                }
+            },
+
+            showDeleteModal(themeName) {
+                APP.pendingDeleteTheme = themeName;
+                $('#deleteThemeName').textContent = themeName;
+                UI.openModal('deleteModal');
+            },
+
+            deleteTheme() {
+                if (!APP.pendingDeleteTheme) return;
+
+                let themes = Storage.getThemes();
+                themes = themes.filter(t => t.name !== APP.pendingDeleteTheme);
+                Storage.saveThemes(themes);
+                
+                UI.closeModal('deleteModal');
+                UI.renderThemes();
+                UI.updateStats();
+                showToast('Theme deleted', 'success');
+                APP.pendingDeleteTheme = null;
+            },
+
+            bindEvents() {
+                // Login form
+                $('#loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const userId = $('#userId').value.trim();
+                    const password = $('#password').value;
+                    
+                    if (!this.login(userId, password)) {
+                        $('#loginError').style.display = 'block';
+                        setTimeout(() => {
+                            $('#loginError').style.display = 'none';
+                        }, 3000);
+                    }
+                });
+
+                // Logout
+                $('#logoutBtn').addEventListener('click', () => this.logout());
+
+                // Navigation
+                $$('.nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const page = item.dataset.page;
+                        UI.navigateTo(page);
+                    });
+                });
+
+                // Quick action cards
+                $$('.action-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const page = card.dataset.navigate;
+                        UI.navigateTo(page);
+                    });
+                });
+
+                // JS Protection
+                $('#protectJsBtn').addEventListener('click', () => this.protectJs());
+                $('#clearJsInput').addEventListener('click', () => {
+                    $('#jsInput').value = '';
+                    $('#jsOutput').textContent = '';
+                    APP.currentProtectedJs = null;
+                    $('#copyJsOutput').disabled = true;
+                    $('#saveJsToTheme').disabled = true;
+                });
+                $('#copyJsOutput').addEventListener('click', () => {
+                    if (APP.currentProtectedJs) {
+                        this.copyToClipboard(APP.currentProtectedJs, 'Protected JS copied!');
+                    }
+                });
+                $('#saveJsToTheme').addEventListener('click', () => this.showSaveModal('js'));
+
+                // CSS Protection
+                $('#protectCssBtn').addEventListener('click', () => this.protectCss());
+                $('#clearCssInput').addEventListener('click', () => {
+                    $('#cssInput').value = '';
+                    $('#cssOutput').textContent = '';
+                    APP.currentProtectedCss = null;
+                    $('#copyCssOutput').disabled = true;
+                    $('#saveCssToTheme').disabled = true;
+                });
+                $('#copyCssOutput').addEventListener('click', () => {
+                    if (APP.currentProtectedCss) {
+                        this.copyToClipboard(APP.currentProtectedCss, 'Protected CSS copied!');
+                    }
+                });
+                $('#saveCssToTheme').addEventListener('click', () => this.showSaveModal('css'));
+
+                // Theme Manager
+                $('#createThemeBtn').addEventListener('click', () => this.createTheme());
+                $('#themeName').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.createTheme();
+                });
+
+                // Save Modal
+                $('#closeSaveModal').addEventListener('click', () => UI.closeModal('saveModal'));
+                $('#cancelSaveModal').addEventListener('click', () => UI.closeModal('saveModal'));
+                $('#confirmSaveModal').addEventListener('click', () => this.saveToTheme());
+
+                // Delete Modal
+                $('#closeDeleteModal').addEventListener('click', () => UI.closeModal('deleteModal'));
+                $('#cancelDeleteModal').addEventListener('click', () => UI.closeModal('deleteModal'));
+                $('#confirmDeleteModal').addEventListener('click', () => this.deleteTheme());
+
+                // Close modals on overlay click
+                $$('.modal-overlay').forEach(overlay => {
+                    overlay.addEventListener('click', (e) => {
+                        if (e.target === overlay) {
+                            overlay.classList.remove('active');
+                        }
+                    });
+                });
+
+                // Escape key to close modals
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        $$('.modal-overlay.active').forEach(modal => {
+                            modal.classList.remove('active');
+                        });
+                    }
+                });
+            }
+        };
+
+        // Make App globally accessible for inline event handlers
+        window.App = App;
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+    </script>
 </body>
 </html>
