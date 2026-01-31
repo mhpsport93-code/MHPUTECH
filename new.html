@@ -1,771 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkShield - URL Shortener & Verification</title>
-    <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: #1a1a24;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0b0;
-            --text-muted: #6b6b7b;
-            --accent-primary: #6366f1;
-            --accent-secondary: #818cf8;
-            --accent-glow: rgba(99, 102, 241, 0.3);
-            --success: #22c55e;
-            --border-color: #2a2a3a;
-            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-            --gradient-bg: radial-gradient(ellipse at top, #1a1a2e 0%, #0a0a0f 70%);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard • Clean</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-S..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #ffffff;
+      color: #111111;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: var(--gradient-bg);
-            min-height: 100vh;
-            color: var(--text-primary);
-            line-height: 1.6;
-        }
+    /* ── Header ── */
+    header {
+      height: 64px;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
 
-        /* Homepage Styles */
-        .homepage {
-            min-height: 100vh;
-            padding: 2rem;
-        }
+    .logo-title {
+      font-size: 1.375rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
 
-        .homepage.hidden {
-            display: none;
-        }
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px;
+      background: #ffffff;
+      border-right: 1px solid #e5e5e5;
+      position: fixed;
+      top: 64px;
+      bottom: 0;
+      left: 0;
+      padding: 24px 16px;
+      overflow-y: auto;
+      transition: transform 0.25s ease;
+      z-index: 80;
+    }
 
-        .header {
-            text-align: center;
-            padding: 3rem 0;
-        }
+    .sidebar nav ul {
+      list-style: none;
+    }
 
-        .logo {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-        }
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: #333333;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 10px;
+      margin: 4px 0;
+      transition: all 0.15s ease;
+    }
 
-        .tagline {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
+    .sidebar nav a:hover,
+    .sidebar nav a.active {
+      background: #f5f5f5;
+      color: #000000;
+    }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+    .sidebar nav a i {
+      width: 20px;
+      text-align: center;
+      opacity: 0.7;
+    }
 
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-        }
+    .sidebar nav a.active i {
+      opacity: 1;
+    }
 
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
+    /* ── Main Content ── */
+    main {
+      margin-left: 240px;
+      padding: 32px 40px;
+      flex: 1;
+      transition: margin-left 0.25s ease;
+    }
 
-        .card-title .icon {
-            width: 32px;
-            height: 32px;
-            background: var(--gradient-primary);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-        }
+    .grid-container {
+      max-width: 1100px;
+      margin: 0 auto 64px;
+    }
 
-        .input-group {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      justify-items: center;
+    }
 
-        .input-group.vertical {
-            flex-direction: column;
-        }
+    .card-btn {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-width: 180px;
+      background: #ffffff;
+      border: 1px solid #e2e2e2;
+      border-radius: 16px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #111111;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      line-height: 1.3;
+    }
 
-        input, select {
-            flex: 1;
-            padding: 1rem 1.25rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
+    .card-btn:hover {
+      border-color: #c0c0c0;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
+    /* ── About Section ── */
+    .about-section {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
 
-        input::placeholder {
-            color: var(--text-muted);
-        }
+    .about-section h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.2em;
+      color: #000;
+    }
 
-        .btn {
-            padding: 1rem 2rem;
-            background: var(--gradient-primary);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
+    .about-section p {
+      font-size: 1.03rem;
+      line-height: 1.6;
+      color: #444;
+      margin-bottom: 1.4em;
+    }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px var(--accent-glow);
-        }
+    /* ── Mobile ── */
+    @media (max-width: 1023px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
 
-        .btn:active {
-            transform: translateY(0);
-        }
+      main {
+        margin-left: 0;
+      }
 
-        .result-box {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1rem 1.25rem;
-            display: none;
-            align-items: center;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
 
-        .result-box.show {
-            display: flex;
-        }
+      .card-btn {
+        max-width: 160px;
+        font-size: 0.98rem;
+      }
+    }
 
-        .result-url {
-            flex: 1;
-            color: var(--accent-secondary);
-            word-break: break-all;
-            font-family: monospace;
-        }
+    @media (max-width: 640px) {
+      header {
+        padding: 0 16px;
+      }
 
-        .btn-copy {
-            padding: 0.5rem 1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+      main {
+        padding: 24px 16px;
+      }
 
-        .btn-copy:hover {
-            background: var(--accent-primary);
-            border-color: var(--accent-primary);
-        }
+      .grid {
+        gap: 16px;
+      }
 
-        .label {
-            display: block;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .steps-input {
-            width: 100px;
-        }
-
-        .script-output {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1rem;
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: var(--accent-secondary);
-            max-height: 200px;
-            overflow: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
-            display: none;
-            margin-top: 1rem;
-        }
-
-        .script-output.show {
-            display: block;
-        }
-
-        /* Verification Page Styles */
-        .verification-page {
-            min-height: 100vh;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            background: var(--bg-primary);
-        }
-
-        .verification-page.active {
-            display: flex;
-        }
-
-        .verification-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 3rem;
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        .step-indicator {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .verification-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-        }
-
-        .timers-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .timer-section {
-            opacity: 0.3;
-            transition: all 0.5s ease;
-        }
-
-        .timer-section.active {
-            opacity: 1;
-        }
-
-        .timer-section.completed {
-            opacity: 0.6;
-        }
-
-        .timer-label {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-bottom: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .timer-circle-container {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            margin: 0 auto;
-        }
-
-        .timer-circle {
-            transform: rotate(-90deg);
-        }
-
-        .timer-circle-bg {
-            fill: none;
-            stroke: var(--bg-secondary);
-            stroke-width: 6;
-        }
-
-        .timer-circle-progress {
-            fill: none;
-            stroke: url(#gradient);
-            stroke-width: 6;
-            stroke-linecap: round;
-            stroke-dasharray: 226;
-            stroke-dashoffset: 226;
-            transition: stroke-dashoffset 1s linear;
-        }
-
-        .timer-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .timer-status {
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .timer-section.completed .timer-status {
-            color: var(--success);
-        }
-
-        .continue-btn {
-            display: none;
-            width: 100%;
-            padding: 1.25rem;
-            background: var(--gradient-primary);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            animation: pulse 2s infinite;
-        }
-
-        .continue-btn.show {
-            display: block;
-        }
-
-        .continue-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px var(--accent-glow);
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 var(--accent-glow);
-            }
-            50% {
-                box-shadow: 0 0 0 10px transparent;
-            }
-        }
-
-        .checkmark {
-            display: none;
-            color: var(--success);
-            font-size: 1.5rem;
-        }
-
-        .timer-section.completed .checkmark {
-            display: inline;
-        }
-
-        .timer-section.completed .timer-circle-container {
-            display: none;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .input-group {
-                flex-direction: column;
-            }
-            
-            .verification-card {
-                padding: 2rem;
-            }
-            
-            .logo {
-                font-size: 2rem;
-            }
-        }
-    </style>
+      .card-btn {
+        max-width: 140px;
+        font-size: 0.94rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Homepage -->
-    <div class="homepage" id="homepage">
-        <div class="container">
-            <header class="header">
-                <h1 class="logo">LinkShield</h1>
-                <p class="tagline">Secure URL Shortener with Multi-Step Verification</p>
-            </header>
 
-            <!-- URL Shortener Card -->
-            <div class="card">
-                <h2 class="card-title">
-                    <span class="icon">🔗</span>
-                    Shorten URL
-                </h2>
-                <div class="input-group">
-                    <input type="url" id="urlInput" placeholder="Enter your long URL here...">
-                    <input type="number" id="stepsInput" class="steps-input" value="3" min="1" max="10" placeholder="Steps">
-                    <button class="btn" onclick="shortenUrl()">Shorten</button>
-                </div>
-                <div class="result-box" id="resultBox">
-                    <span class="result-url" id="resultUrl"></span>
-                    <button class="btn-copy" onclick="copyResult()">Copy</button>
-                </div>
-            </div>
+  <header>
+    <div class="logo-title">Dashboard</div>
+  </header>
 
-            <!-- Script Generator Card -->
-            <div class="card">
-                <h2 class="card-title">
-                    <span class="icon">⚡</span>
-                    Script Generator
-                </h2>
-                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                    Generate a script to intercept article content links. Add this script to your website.
-                </p>
-                <div class="input-group vertical">
-                    <div>
-                        <label class="label">Shortener Base URL</label>
-                        <input type="url" id="baseUrlInput" placeholder="https://your-domain.com/index.html">
-                    </div>
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <div style="flex: 1;">
-                            <label class="label">Number of Verification Steps</label>
-                            <input type="number" id="scriptStepsInput" value="3" min="1" max="10">
-                        </div>
-                        <button class="btn" onclick="generateScript()">Generate Script</button>
-                    </div>
-                </div>
-                <div class="script-output" id="scriptOutput"></div>
-                <div class="result-box" id="scriptResultBox" style="display: none;">
-                    <span style="color: var(--success);">✓ Script generated successfully!</span>
-                    <button class="btn-copy" onclick="copyScript()">Copy Script</button>
-                </div>
-            </div>
+  <div class="sidebar">
+    <nav>
+      <ul>
+        <li><a href="#" class="active"><i class="fa-solid fa-gauge"></i> Overview</a></li>
+        <li><a href="#"><i class="fa-solid fa-chart-line"></i> Analytics</a></li>
+        <li><a href="#"><i class="fa-solid fa-users"></i> Customers</a></li>
+        <li><a href="#"><i class="fa-solid fa-box"></i> Products</a></li>
+        <li><a href="#"><i class="fa-solid fa-receipt"></i> Orders</a></li>
+        <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
+      </ul>
+    </nav>
+  </div>
 
-            <footer class="footer">
-                <p>LinkShield — Secure your links with verification</p>
-            </footer>
-        </div>
+  <main>
+    <div class="grid-container">
+      <div class="grid">
+        <button class="card-btn">Analytics</button>
+        <button class="card-btn">Customers</button>
+        <button class="card-btn">Orders</button>
+        <button class="card-btn">Products</button>
+        <button class="card-btn">Messages</button>
+        <button class="card-btn">Settings</button>
+      </div>
     </div>
 
-    <!-- Verification Page -->
-    <div class="verification-page" id="verificationPage">
-        <div class="verification-card">
-            <div class="step-indicator" id="stepIndicator">Step 1 of 3</div>
-            <h1 class="verification-title">Verifying Access</h1>
-            
-            <svg style="position: absolute; width: 0; height: 0;">
-                <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#6366f1"/>
-                        <stop offset="50%" stop-color="#8b5cf6"/>
-                        <stop offset="100%" stop-color="#a855f7"/>
-                    </linearGradient>
-                </defs>
-            </svg>
-
-            <div class="timers-container">
-                <!-- Top Timer -->
-                <div class="timer-section" id="topTimer">
-                    <div class="timer-label">Security Check</div>
-                    <div class="timer-circle-container">
-                        <svg class="timer-circle" width="80" height="80" viewBox="0 0 80 80">
-                            <circle class="timer-circle-bg" cx="40" cy="40" r="36"/>
-                            <circle class="timer-circle-progress" id="topProgress" cx="40" cy="40" r="36"/>
-                        </svg>
-                        <span class="timer-text" id="topTimerText">15</span>
-                    </div>
-                    <span class="checkmark">✓</span>
-                    <div class="timer-status" id="topStatus">Waiting...</div>
-                </div>
-
-                <!-- Center Timer -->
-                <div class="timer-section" id="centerTimer">
-                    <div class="timer-label">Link Validation</div>
-                    <div class="timer-circle-container">
-                        <svg class="timer-circle" width="80" height="80" viewBox="0 0 80 80">
-                            <circle class="timer-circle-bg" cx="40" cy="40" r="36"/>
-                            <circle class="timer-circle-progress" id="centerProgress" cx="40" cy="40" r="36"/>
-                        </svg>
-                        <span class="timer-text" id="centerTimerText">15</span>
-                    </div>
-                    <span class="checkmark">✓</span>
-                    <div class="timer-status" id="centerStatus">Waiting...</div>
-                </div>
-
-                <!-- Bottom Timer -->
-                <div class="timer-section" id="bottomTimer">
-                    <div class="timer-label">Preparing Redirect</div>
-                    <div class="timer-circle-container">
-                        <svg class="timer-circle" width="80" height="80" viewBox="0 0 80 80">
-                            <circle class="timer-circle-bg" cx="40" cy="40" r="36"/>
-                            <circle class="timer-circle-progress" id="bottomProgress" cx="40" cy="40" r="36"/>
-                        </svg>
-                        <span class="timer-text" id="bottomTimerText">15</span>
-                    </div>
-                    <span class="checkmark">✓</span>
-                    <div class="timer-status" id="bottomStatus">Waiting...</div>
-                </div>
-            </div>
-
-            <button class="continue-btn" id="continueBtn" onclick="handleContinue()">
-                Continue →
-            </button>
-        </div>
+    <div class="about-section">
+      <h2>Welcome to your dashboard</h2>
+      <p>This clean workspace gives you quick access to the most important areas of your business. Everything you need is just one click away.</p>
+      <p>Use the cards above to jump to frequently used sections or explore the sidebar menu for more detailed options and reports.</p>
     </div>
+  </main>
 
-    <script>
-        // Configuration
-        const TIMER_DURATION = 15; // seconds per timer
-        const CIRCUMFERENCE = 2 * Math.PI * 36; // 226.19
-
-        // State
-        let currentStep = 1;
-        let totalSteps = 3;
-        let originalUrl = '';
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedData = urlParams.get('data');
-            const steps = urlParams.get('steps');
-
-            if (encodedData && steps) {
-                // Verification mode
-                try {
-                    originalUrl = atob(encodedData);
-                    totalSteps = parseInt(steps) || 3;
-                    currentStep = 1;
-                    showVerificationPage();
-                } catch (e) {
-                    console.error('Invalid encoded URL');
-                    showHomepage();
-                }
-            } else {
-                // Homepage mode
-                showHomepage();
-                // Auto-fill base URL
-                document.getElementById('baseUrlInput').value = window.location.href.split('?')[0];
-            }
-        });
-
-        function showHomepage() {
-            document.getElementById('homepage').classList.remove('hidden');
-            document.getElementById('verificationPage').classList.remove('active');
-        }
-
-        function showVerificationPage() {
-            document.getElementById('homepage').classList.add('hidden');
-            document.getElementById('verificationPage').classList.add('active');
-            startStep();
-        }
-
-        // URL Shortening
-        function shortenUrl() {
-            const url = document.getElementById('urlInput').value.trim();
-            const steps = document.getElementById('stepsInput').value || 3;
-
-            if (!url) {
-                alert('Please enter a valid URL');
-                return;
-            }
-
-            try {
-                new URL(url);
-            } catch (e) {
-                alert('Please enter a valid URL');
-                return;
-            }
-
-            const encoded = btoa(url);
-            const baseUrl = window.location.href.split('?')[0];
-            const shortUrl = `${baseUrl}?data=${encoded}&steps=${steps}`;
-
-            document.getElementById('resultUrl').textContent = shortUrl;
-            document.getElementById('resultBox').classList.add('show');
-        }
-
-        function copyResult() {
-            const url = document.getElementById('resultUrl').textContent;
-            navigator.clipboard.writeText(url).then(() => {
-                const btn = document.querySelector('#resultBox .btn-copy');
-                btn.textContent = 'Copied!';
-                setTimeout(() => btn.textContent = 'Copy', 2000);
-            });
-        }
-
-        // Script Generator
-        function generateScript() {
-            const baseUrl = document.getElementById('baseUrlInput').value.trim();
-            const steps = document.getElementById('scriptStepsInput').value || 3;
-
-            if (!baseUrl) {
-                alert('Please enter the shortener base URL');
-                return;
-            }
-
-            const script = `<script>
-(function() {
-    const SHORTENER_BASE = '${baseUrl}';
-    const STEPS = ${steps};
-    
-    function interceptLinks() {
-        const selectors = ['.post-body a', '.entry-content a', 'article a'];
-        const links = [];
-        
-        selectors.forEach(function(selector) {
-            const elements = document.querySelectorAll(selector);
-            elements.forEach(function(el) { links.push(el); });
-        });
-        
-        links.forEach(function(link) {
-            const href = link.getAttribute('href');
-            if (href && href.startsWith('http') && !link.dataset.shortened) {
-                link.dataset.shortened = 'true';
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const encoded = btoa(href);
-                    const shortUrl = SHORTENER_BASE + '?data=' + encoded + '&steps=' + STEPS;
-                    window.location.href = shortUrl;
-                });
-            }
-        });
-    }
-    
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', interceptLinks);
-    } else {
-        interceptLinks();
-    }
-})();
-<\\/script>`;
-
-            document.getElementById('scriptOutput').textContent = script;
-            document.getElementById('scriptOutput').classList.add('show');
-            document.getElementById('scriptResultBox').style.display = 'flex';
-        }
-
-        function copyScript() {
-            const script = document.getElementById('scriptOutput').textContent;
-            navigator.clipboard.writeText(script).then(() => {
-                const btn = document.querySelector('#scriptResultBox .btn-copy');
-                btn.textContent = 'Copied!';
-                setTimeout(() => btn.textContent = 'Copy Script', 2000);
-            });
-        }
-
-        // Verification Timer System
-        function startStep() {
-            // Reset UI for new step
-            document.getElementById('stepIndicator').textContent = `Step ${currentStep} of ${totalSteps}`;
-            
-            // Reset all timers
-            resetTimer('top');
-            resetTimer('center');
-            resetTimer('bottom');
-            
-            // Hide continue button
-            document.getElementById('continueBtn').classList.remove('show');
-            
-            // Start timer sequence
-            startTopTimer();
-        }
-
-        function resetTimer(position) {
-            const section = document.getElementById(`${position}Timer`);
-            const progress = document.getElementById(`${position}Progress`);
-            const text = document.getElementById(`${position}TimerText`);
-            const status = document.getElementById(`${position}Status`);
-            
-            section.classList.remove('active', 'completed');
-            progress.style.strokeDashoffset = CIRCUMFERENCE;
-            text.textContent = TIMER_DURATION;
-            status.textContent = 'Waiting...';
-        }
-
-        function runTimer(position, callback) {
-            const section = document.getElementById(`${position}Timer`);
-            const progress = document.getElementById(`${position}Progress`);
-            const text = document.getElementById(`${position}TimerText`);
-            const status = document.getElementById(`${position}Status`);
-            
-            section.classList.add('active');
-            status.textContent = 'Processing...';
-            
-            let remaining = TIMER_DURATION;
-            
-            const interval = setInterval(() => {
-                remaining--;
-                text.textContent = remaining;
-                
-                // Update circle progress
-                const offset = CIRCUMFERENCE - ((TIMER_DURATION - remaining) / TIMER_DURATION) * CIRCUMFERENCE;
-                progress.style.strokeDashoffset = offset;
-                
-                if (remaining <= 0) {
-                    clearInterval(interval);
-                    section.classList.remove('active');
-                    section.classList.add('completed');
-                    status.textContent = 'Complete!';
-                    if (callback) callback();
-                }
-            }, 1000);
-        }
-
-        function startTopTimer() {
-            runTimer('top', startCenterTimer);
-        }
-
-        function startCenterTimer() {
-            runTimer('center', startBottomTimer);
-        }
-
-        function startBottomTimer() {
-            runTimer('bottom', showContinueButton);
-        }
-
-        function showContinueButton() {
-            const btn = document.getElementById('continueBtn');
-            
-            if (currentStep >= totalSteps) {
-                btn.textContent = 'Get Link →';
-            } else {
-                btn.textContent = 'Continue →';
-            }
-            
-            btn.classList.add('show');
-        }
-
-        function handleContinue() {
-            if (currentStep >= totalSteps) {
-                // Final step - open about:blank then redirect
-                const newWindow = window.open('about:blank', '_blank');
-                window.location.href = originalUrl;
-            } else {
-                // Move to next step
-                currentStep++;
-                startStep();
-            }
-        }
-    </script>
 </body>
 </html>
