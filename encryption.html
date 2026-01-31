@@ -1,1 +1,1983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Admin Panel - Code Protection Tool</title>
+    <style>
+        /* ============================================
+           DESIGN SYSTEM - CSS Variables
+           ============================================ */
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --bg-input: #0d1321;
+            --bg-hover: #243049;
+            
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --accent-primary: #3b82f6;
+            --accent-primary-hover: #2563eb;
+            --accent-success: #10b981;
+            --accent-success-hover: #059669;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-danger-hover: #dc2626;
+            
+            --border-color: #2a3a52;
+            --border-focus: #3b82f6;
+            
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
+            --shadow-glow: 0 0 20px rgba(59,130,246,0.3);
+            
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.25s ease;
+        }
 
+        /* ============================================
+           RESET & BASE STYLES
+           ============================================ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Disable text selection on sensitive areas */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* ============================================
+           TYPOGRAPHY
+           ============================================ */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+
+        h1 { font-size: 2rem; }
+        h2 { font-size: 1.5rem; }
+        h3 { font-size: 1.25rem; }
+
+        p { color: var(--text-secondary); }
+
+        /* ============================================
+           LAYOUT COMPONENTS
+           ============================================ */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-1 { gap: 0.5rem; }
+        .gap-2 { gap: 1rem; }
+        .gap-3 { gap: 1.5rem; }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-cols-1 { grid-template-columns: 1fr; }
+
+        @media (min-width: 768px) {
+            .md-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            .lg-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* ============================================
+           CARD COMPONENT
+           ============================================ */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-normal);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-primary);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+            border-radius: var(--radius-md);
+            font-size: 1.25rem;
+        }
+
+        /* ============================================
+           BUTTON STYLES
+           ============================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            min-height: 44px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--accent-primary-hover), #1d4ed8);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent-success), var(--accent-success-hover));
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, var(--accent-success-hover), #047857);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-danger), var(--accent-danger-hover));
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, var(--accent-danger-hover), #b91c1c);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            min-height: 36px;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* ============================================
+           INPUT STYLES
+           ============================================ */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            color: var(--text-primary);
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+            min-height: 44px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-textarea {
+            min-height: 180px;
+            resize: vertical;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* ============================================
+           LOGIN PAGE
+           ============================================ */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: var(--bg-primary);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .login-error {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* ============================================
+           DASHBOARD LAYOUT
+           ============================================ */
+        .dashboard {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (min-width: 640px) {
+            .user-info { display: flex; }
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-content {
+            display: flex;
+            gap: 0.25rem;
+            padding: 0.5rem 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            border: none;
+            background: none;
+            min-height: 44px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            padding: 1.5rem 1rem;
+            background: var(--bg-primary);
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Page Sections */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* ============================================
+           DASHBOARD HOME
+           ============================================ */
+        .stats-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.blue { background: rgba(59,130,246,0.15); color: var(--accent-primary); }
+        .stat-icon.green { background: rgba(16,185,129,0.15); color: var(--accent-success); }
+        .stat-icon.yellow { background: rgba(245,158,11,0.15); color: var(--accent-warning); }
+        .stat-icon.red { background: rgba(239,68,68,0.15); color: var(--accent-danger); }
+
+        .stat-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .quick-actions { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (min-width: 1024px) {
+            .quick-actions { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .action-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+
+        .action-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .action-card-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           PROTECTION TOOLS
+           ============================================ */
+        .tool-section {
+            margin-bottom: 2rem;
+        }
+
+        .tool-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            .tool-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .tool-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .tool-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .tool-panel-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .tool-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .output-box {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: var(--accent-success);
+            max-height: 300px;
+            overflow: auto;
+            word-break: break-all;
+        }
+
+        .output-box:empty::before {
+            content: 'Protected output will appear here...';
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           THEME MANAGER
+           ============================================ */
+        .theme-form {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .theme-form-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .theme-form-grid { grid-template-columns: 1fr auto; align-items: end; }
+        }
+
+        .themes-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .theme-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            transition: all var(--transition-fast);
+        }
+
+        .theme-item:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .theme-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .theme-item-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theme-item-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .theme-item-content {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .theme-item-content { grid-template-columns: 1fr 1fr; }
+        }
+
+        .theme-code-preview {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+        }
+
+        .theme-code-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .theme-code-snippet {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--accent-success);
+            word-break: break-all;
+            max-height: 60px;
+            overflow: hidden;
+        }
+
+        .theme-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* ============================================
+           TOAST NOTIFICATIONS
+           ============================================ */
+        .toast-container {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 280px;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success { border-left: 3px solid var(--accent-success); }
+        .toast.error { border-left: 3px solid var(--accent-danger); }
+        .toast.info { border-left: 3px solid var(--accent-primary); }
+
+        .toast-icon {
+            font-size: 1.25rem;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1rem;
+        }
+
+        /* ============================================
+           MODAL
+           ============================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform var(--transition-normal);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.25rem;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        /* ============================================
+           UTILITY CLASSES
+           ============================================ */
+        .hidden { display: none !important; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .text-center { text-align: center; }
+        .text-success { color: var(--accent-success); }
+        .text-danger { color: var(--accent-danger); }
+
+        /* ============================================
+           SCROLLBAR STYLING
+           ============================================ */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-input);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ============================================
+           RESPONSIVE ADJUSTMENTS
+           ============================================ */
+        @media (max-width: 640px) {
+            .login-card { padding: 1.5rem; }
+            .card { padding: 1rem; }
+            .tool-panel { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body class="no-select">
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Login Page -->
+    <div class="login-page" id="loginPage">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-logo">
+                    <div class="login-logo-icon">🛡️</div>
+                    <h1 class="login-title">Admin Panel</h1>
+                    <p class="login-subtitle">Code Protection Tool</p>
+                </div>
+                
+                <div class="login-error" id="loginError">
+                    Invalid credentials. Please try again.
+                </div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="userId">User ID</label>
+                        <input type="text" id="userId" class="form-input" placeholder="Enter your user ID" required autocomplete="username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        🔐 Sign In
+                    </button>
+                </form>
+
+                <p class="mt-2 text-center" style="font-size: 0.8rem; color: var(--text-muted);">
+                    Default: admin / admin123
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard hidden" id="dashboard">
+        <!-- Header -->
+        <header class="header no-select">
+            <div class="header-content">
+                <div class="header-brand">
+                    <div class="header-logo">🛡️</div>
+                    <span class="header-title">Admin Panel</span>
+                </div>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">A</div>
+                        <span id="userDisplay">admin</span>
+                    </div>
+                    <button class="btn btn-outline btn-sm" id="logoutBtn">
+                        🚪 Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav no-select">
+            <div class="nav-content">
+                <button class="nav-item active" data-page="home">
+                    🏠 Dashboard
+                </button>
+                <button class="nav-item" data-page="js-protect">
+                    ⚡ JS Protection
+                </button>
+                <button class="nav-item" data-page="css-protect">
+                    🎨 CSS Protection
+                </button>
+                <button class="nav-item" data-page="themes">
+                    📦 Theme Manager
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="main-content">
+                
+                <!-- Home Page -->
+                <section class="page active" id="page-home">
+                    <div class="page-header">
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-description">Welcome to your code protection admin panel</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">📦</div>
+                            <div class="stat-info">
+                                <h3 id="statThemes">0</h3>
+                                <p>Saved Themes</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">⚡</div>
+                            <div class="stat-info">
+                                <h3 id="statJs">0</h3>
+                                <p>JS Protected</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon yellow">🎨</div>
+                            <div class="stat-info">
+                                <h3 id="statCss">0</h3>
+                                <p>CSS Protected</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red">🔒</div>
+                            <div class="stat-info">
+                                <h3>Active</h3>
+                                <p>Protection Status</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="mb-2">Quick Actions</h2>
+                    <div class="quick-actions">
+                        <div class="action-card" data-navigate="js-protect">
+                            <div class="action-card-icon">⚡</div>
+                            <h3>Protect JavaScript</h3>
+                            <p>Obfuscate and encrypt your JavaScript code for maximum protection</p>
+                        </div>
+                        <div class="action-card" data-navigate="css-protect">
+                            <div class="action-card-icon">🎨</div>
+                            <h3>Protect CSS</h3>
+                            <p>Encrypt your stylesheets and inject them at runtime</p>
+                        </div>
+                        <div class="action-card" data-navigate="themes">
+                            <div class="action-card-icon">📦</div>
+                            <h3>Manage Themes</h3>
+                            <p>Save and organize your protected code under theme names</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- JS Protection Page -->
+                <section class="page" id="page-js-protect">
+                    <div class="page-header">
+                        <h1 class="page-title">JavaScript Protection</h1>
+                        <p class="page-description">Obfuscate and encrypt your JavaScript code</p>
+                    </div>
+
+                    <div class="tool-grid">
+                        <div class="tool-panel">
+                            <div class="tool-panel-header">
+                                <span class="tool-panel-title">📝 Original JavaScript</span>
+                            </div>
+                            <textarea 
+                                class="form-input form-textarea" 
+                                id="jsInput" 
+                                placeholder="// Paste your JavaScript code here...
+function hello() {
+    console.log('Hello World!');
+}"></textarea>
+                            <div class="tool-actions mt-2">
+                                <button class="btn btn-primary" id="protectJsBtn">
+                                    🔒 Protect JS
+                                </button>
+                                <button class="btn btn-outline" id="clearJsInput">
+                                    🗑️ Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="tool-panel">
+                            <div class="tool-panel-header">
+                                <span class="tool-panel-title">🔐 Protected Output</span>
+                            </div>
+                            <div class="output-box" id="jsOutput"></div>
+                            <div class="tool-actions mt-2">
+                                <button class="btn btn-success" id="copyJsOutput" disabled>
+                                    📋 Copy
+                                </button>
+                                <button class="btn btn-outline" id="saveJsToTheme" disabled>
+                                    💾 Save to Theme
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-2">
+                        <h3 class="mb-1">📌 Cloudflare Worker Format</h3>
+                        <p class="mb-1">Use this key format in your KV storage:</p>
+                        <code style="color: var(--accent-success);">themeName_js</code>
+                        <p class="mt-1" style="font-size: 0.85rem;">Load via: <code style="color: var(--accent-primary);">/__secure/?t=themeName</code></p>
+                    </div>
+                </section>
+
+                <!-- CSS Protection Page -->
+                <section class="page" id="page-css-protect">
+                    <div class="page-header">
+                        <h1 class="page-title">CSS Protection</h1>
+                        <p class="page-description">Encrypt your stylesheets for runtime injection</p>
+                    </div>
+
+                    <div class="tool-grid">
+                        <div class="tool-panel">
+                            <div class="tool-panel-header">
+                                <span class="tool-panel-title">📝 Original CSS</span>
+                            </div>
+                            <textarea 
+                                class="form-input form-textarea" 
+                                id="cssInput" 
+                                placeholder="/* Paste your CSS code here... */
+body {
+    background: #000;
+    color: #fff;
+}"></textarea>
+                            <div class="tool-actions mt-2">
+                                <button class="btn btn-primary" id="protectCssBtn">
+                                    🔒 Protect CSS
+                                </button>
+                                <button class="btn btn-outline" id="clearCssInput">
+                                    🗑️ Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="tool-panel">
+                            <div class="tool-panel-header">
+                                <span class="tool-panel-title">🔐 Protected Output</span>
+                            </div>
+                            <div class="output-box" id="cssOutput"></div>
+                            <div class="tool-actions mt-2">
+                                <button class="btn btn-success" id="copyCssOutput" disabled>
+                                    📋 Copy
+                                </button>
+                                <button class="btn btn-outline" id="saveCssToTheme" disabled>
+                                    💾 Save to Theme
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-2">
+                        <h3 class="mb-1">📌 Cloudflare Worker Format</h3>
+                        <p class="mb-1">Use this key format in your KV storage:</p>
+                        <code style="color: var(--accent-success);">themeName_css</code>
+                        <p class="mt-1" style="font-size: 0.85rem;">Load via: <code style="color: var(--accent-primary);">/__secure/?t=themeName</code></p>
+                    </div>
+                </section>
+
+                <!-- Theme Manager Page -->
+                <section class="page" id="page-themes">
+                    <div class="page-header">
+                        <h1 class="page-title">Theme Manager</h1>
+                        <p class="page-description">Save and manage your protected code themes</p>
+                    </div>
+
+                    <div class="theme-form">
+                        <h3 class="mb-1">➕ Create New Theme</h3>
+                        <div class="theme-form-grid">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" for="themeName">Theme Name</label>
+                                <input type="text" id="themeName" class="form-input" placeholder="e.g., my-awesome-theme">
+                            </div>
+                            <button class="btn btn-primary" id="createThemeBtn">
+                                📦 Create Theme
+                            </button>
+                        </div>
+                    </div>
+
+                    <h2 class="mb-2">Saved Themes</h2>
+                    <div class="themes-list" id="themesList">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📦</div>
+                            <p>No themes saved yet</p>
+                            <p style="font-size: 0.85rem;">Create a theme and add protected code to get started</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Save to Theme Modal -->
+    <div class="modal-overlay" id="saveModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">💾 Save to Theme</h2>
+                <button class="modal-close" id="closeSaveModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="modalThemeName">Theme Name</label>
+                    <input type="text" id="modalThemeName" class="form-input" placeholder="Enter theme name">
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    This will save the protected code under the specified theme name.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelSaveModal">Cancel</button>
+                <button class="btn btn-primary" id="confirmSaveModal">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">🗑️ Delete Theme</h2>
+                <button class="modal-close" id="closeDeleteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete theme "<strong id="deleteThemeName"></strong>"?</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDeleteModal">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteModal">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ============================================
+           SECURITY MEASURES
+           ============================================ */
+        (function() {
+            // Disable right-click context menu
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // Disable keyboard shortcuts for inspect
+            document.addEventListener('keydown', function(e) {
+                // F12
+                if (e.key === 'F12') {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+                if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+U (view source)
+                if (e.ctrlKey && e.key.toUpperCase() === 'U') {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // DevTools detection (basic)
+            let devToolsOpen = false;
+            const threshold = 160;
+            
+            function checkDevTools() {
+                const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+                const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+                
+                if (widthThreshold || heightThreshold) {
+                    if (!devToolsOpen) {
+                        devToolsOpen = true;
+                        console.clear();
+                        console.log('%c⚠️ Developer Tools Detected', 'color: red; font-size: 24px; font-weight: bold;');
+                    }
+                } else {
+                    devToolsOpen = false;
+                }
+            }
+
+            setInterval(checkDevTools, 1000);
+        })();
+
+        /* ============================================
+           APPLICATION STATE
+           ============================================ */
+        const APP = {
+            SESSION_KEY: 'admin_session',
+            THEMES_KEY: 'admin_themes',
+            STATS_KEY: 'admin_stats',
+            
+            // Default credentials (in production, use proper auth)
+            USERS: {
+                'admin': 'admin123',
+                'user': 'user123'
+            },
+
+            currentProtectedJs: null,
+            currentProtectedCss: null,
+            pendingSaveType: null,
+            pendingDeleteTheme: null
+        };
+
+        /* ============================================
+           UTILITY FUNCTIONS
+           ============================================ */
+        function $(selector) {
+            return document.querySelector(selector);
+        }
+
+        function $$(selector) {
+            return document.querySelectorAll(selector);
+        }
+
+        function showToast(message, type = 'info') {
+            const container = $('#toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || icons.info}</span>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close">&times;</button>
+            `;
+
+            container.appendChild(toast);
+
+            toast.querySelector('.toast-close').addEventListener('click', () => {
+                toast.remove();
+            });
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 4000);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        /* ============================================
+           OBFUSCATION ENGINE
+           ============================================ */
+        const Obfuscator = {
+            // Character map for additional encoding
+            charMap: {},
+            reverseMap: {},
+
+            init() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+                const shuffled = chars.split('').sort(() => Math.random() - 0.5).join('');
+                
+                for (let i = 0; i < chars.length; i++) {
+                    this.charMap[chars[i]] = shuffled[i];
+                    this.reverseMap[shuffled[i]] = chars[i];
+                }
+            },
+
+            // Simple XOR encryption
+            xorEncrypt(str, key) {
+                let result = '';
+                for (let i = 0; i < str.length; i++) {
+                    result += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+                }
+                return result;
+            },
+
+            // Base64 encode
+            base64Encode(str) {
+                try {
+                    return btoa(unescape(encodeURIComponent(str)));
+                } catch (e) {
+                    return btoa(str);
+                }
+            },
+
+            // Hex encode
+            hexEncode(str) {
+                let hex = '';
+                for (let i = 0; i < str.length; i++) {
+                    hex += str.charCodeAt(i).toString(16).padStart(2, '0');
+                }
+                return hex;
+            },
+
+            // Generate random variable names
+            generateVarName(length = 8) {
+                const chars = 'abcdefghijklmnopqrstuvwxyz';
+                const prefix = chars[Math.floor(Math.random() * chars.length)];
+                let result = prefix;
+                const allChars = chars + '0123456789_';
+                for (let i = 1; i < length; i++) {
+                    result += allChars[Math.floor(Math.random() * allChars.length)];
+                }
+                return result;
+            },
+
+            // Add noise/decoy code
+            generateNoise() {
+                const decoys = [
+                    'var _0x0=[];',
+                    'function _(){}',
+                    'if(false){}',
+                    'try{}catch(_){}',
+                    '(function(){})();',
+                    'void 0;',
+                    '0||1;'
+                ];
+                return decoys[Math.floor(Math.random() * decoys.length)];
+            },
+
+            // Main JS protection function
+            protectJs(code) {
+                if (!code || !code.trim()) return null;
+
+                const key = this.generateVarName(16);
+                const encrypted = this.xorEncrypt(code, key);
+                const encoded = this.base64Encode(encrypted);
+                
+                // Variable names
+                const v1 = this.generateVarName();
+                const v2 = this.generateVarName();
+                const v3 = this.generateVarName();
+                const v4 = this.generateVarName();
+                const fn1 = this.generateVarName();
+                const fn2 = this.generateVarName();
+
+                // Create protected wrapper
+                const wrapper = `(function(){${this.generateNoise()}var ${v1}="${encoded}";var ${v2}="${key}";function ${fn1}(${v3}){try{return decodeURIComponent(escape(atob(${v3})));}catch(e){return atob(${v3});}}function ${fn2}(${v3},${v4}){var r="";for(var i=0;i<${v3}.length;i++){r+=String.fromCharCode(${v3}.charCodeAt(i)^${v4}.charCodeAt(i%${v4}.length));}return r;}${this.generateNoise()}try{eval(${fn2}(${fn1}(${v1}),${v2}));}catch(e){console.error("Protected code error");}${this.generateNoise()}})();`;
+
+                return wrapper;
+            },
+
+            // Main CSS protection function
+            protectCss(code) {
+                if (!code || !code.trim()) return null;
+
+                const key = this.generateVarName(16);
+                const encrypted = this.xorEncrypt(code, key);
+                const encoded = this.base64Encode(encrypted);
+
+                // Variable names
+                const v1 = this.generateVarName();
+                const v2 = this.generateVarName();
+                const v3 = this.generateVarName();
+                const v4 = this.generateVarName();
+                const fn1 = this.generateVarName();
+                const fn2 = this.generateVarName();
+
+                // Create CSS injector
+                const wrapper = `(function(){${this.generateNoise()}var ${v1}="${encoded}";var ${v2}="${key}";function ${fn1}(${v3}){try{return decodeURIComponent(escape(atob(${v3})));}catch(e){return atob(${v3});}}function ${fn2}(${v3},${v4}){var r="";for(var i=0;i<${v3}.length;i++){r+=String.fromCharCode(${v3}.charCodeAt(i)^${v4}.charCodeAt(i%${v4}.length));}return r;}${this.generateNoise()}try{var s=document.createElement("style");s.type="text/css";s.appendChild(document.createTextNode(${fn2}(${fn1}(${v1}),${v2})));document.head.appendChild(s);}catch(e){console.error("Protected style error");}${this.generateNoise()}})();`;
+
+                return wrapper;
+            },
+
+            // Generate Cloudflare-compatible string
+            generateCloudflarePayload(protectedCode, themeName, type) {
+                return {
+                    key: `${themeName}_${type}`,
+                    value: protectedCode,
+                    metadata: {
+                        created: new Date().toISOString(),
+                        type: type
+                    }
+                };
+            }
+        };
+
+        // Initialize obfuscator
+        Obfuscator.init();
+
+        /* ============================================
+           STORAGE MANAGER
+           ============================================ */
+        const Storage = {
+            getSession() {
+                try {
+                    return JSON.parse(localStorage.getItem(APP.SESSION_KEY));
+                } catch {
+                    return null;
+                }
+            },
+
+            setSession(user) {
+                localStorage.setItem(APP.SESSION_KEY, JSON.stringify({
+                    user: user,
+                    timestamp: Date.now()
+                }));
+            },
+
+            clearSession() {
+                localStorage.removeItem(APP.SESSION_KEY);
+            },
+
+            getThemes() {
+                try {
+                    return JSON.parse(localStorage.getItem(APP.THEMES_KEY)) || [];
+                } catch {
+                    return [];
+                }
+            },
+
+            saveThemes(themes) {
+                localStorage.setItem(APP.THEMES_KEY, JSON.stringify(themes));
+            },
+
+            getStats() {
+                try {
+                    return JSON.parse(localStorage.getItem(APP.STATS_KEY)) || { js: 0, css: 0 };
+                } catch {
+                    return { js: 0, css: 0 };
+                }
+            },
+
+            updateStats(type) {
+                const stats = this.getStats();
+                stats[type] = (stats[type] || 0) + 1;
+                localStorage.setItem(APP.STATS_KEY, JSON.stringify(stats));
+                return stats;
+            }
+        };
+
+        /* ============================================
+           UI CONTROLLER
+           ============================================ */
+        const UI = {
+            showLogin() {
+                $('#loginPage').classList.remove('hidden');
+                $('#dashboard').classList.add('hidden');
+            },
+
+            showDashboard() {
+                $('#loginPage').classList.add('hidden');
+                $('#dashboard').classList.remove('hidden');
+                this.updateStats();
+                this.renderThemes();
+            },
+
+            navigateTo(page) {
+                $$('.nav-item').forEach(item => item.classList.remove('active'));
+                $$(`.nav-item[data-page="${page}"]`).forEach(item => item.classList.add('active'));
+                
+                $$('.page').forEach(p => p.classList.remove('active'));
+                $(`#page-${page}`).classList.add('active');
+            },
+
+            updateStats() {
+                const themes = Storage.getThemes();
+                const stats = Storage.getStats();
+                
+                $('#statThemes').textContent = themes.length;
+                $('#statJs').textContent = stats.js || 0;
+                $('#statCss').textContent = stats.css || 0;
+            },
+
+            renderThemes() {
+                const themes = Storage.getThemes();
+                const container = $('#themesList');
+
+                if (themes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📦</div>
+                            <p>No themes saved yet</p>
+                            <p style="font-size: 0.85rem;">Create a theme and add protected code to get started</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = themes.map(theme => `
+                    <div class="theme-item" data-theme="${theme.name}">
+                        <div class="theme-item-header">
+                            <span class="theme-item-name">
+                                📦 ${theme.name}
+                            </span>
+                            <span class="theme-item-date">${formatDate(theme.created)}</span>
+                        </div>
+                        <div class="theme-item-content">
+                            <div class="theme-code-preview">
+                                <div class="theme-code-label">⚡ JavaScript</div>
+                                <div class="theme-code-snippet">${theme.js ? theme.js.substring(0, 100) + '...' : '<em style="color: var(--text-muted)">Not set</em>'}</div>
+                            </div>
+                            <div class="theme-code-preview">
+                                <div class="theme-code-label">🎨 CSS</div>
+                                <div class="theme-code-snippet">${theme.css ? theme.css.substring(0, 100) + '...' : '<em style="color: var(--text-muted)">Not set</em>'}</div>
+                            </div>
+                        </div>
+                        <div class="theme-item-actions">
+                            ${theme.js ? `<button class="btn btn-sm btn-success" onclick="App.copyThemeCode('${theme.name}', 'js')">📋 Copy JS</button>` : ''}
+                            ${theme.css ? `<button class="btn btn-sm btn-success" onclick="App.copyThemeCode('${theme.name}', 'css')">📋 Copy CSS</button>` : ''}
+                            <button class="btn btn-sm btn-danger" onclick="App.showDeleteModal('${theme.name}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            openModal(modalId) {
+                $(`#${modalId}`).classList.add('active');
+            },
+
+            closeModal(modalId) {
+                $(`#${modalId}`).classList.remove('active');
+            }
+        };
+
+        /* ============================================
+           APPLICATION CONTROLLER
+           ============================================ */
+        const App = {
+            init() {
+                this.checkSession();
+                this.bindEvents();
+            },
+
+            checkSession() {
+                const session = Storage.getSession();
+                if (session && session.user) {
+                    this.setUserDisplay(session.user);
+                    UI.showDashboard();
+                } else {
+                    UI.showLogin();
+                }
+            },
+
+            setUserDisplay(user) {
+                $('#userDisplay').textContent = user;
+                $('#userAvatar').textContent = user.charAt(0).toUpperCase();
+            },
+
+            login(userId, password) {
+                if (APP.USERS[userId] && APP.USERS[userId] === password) {
+                    Storage.setSession(userId);
+                    this.setUserDisplay(userId);
+                    UI.showDashboard();
+                    showToast('Welcome back, ' + userId + '!', 'success');
+                    return true;
+                }
+                return false;
+            },
+
+            logout() {
+                Storage.clearSession();
+                UI.showLogin();
+                showToast('Logged out successfully', 'info');
+            },
+
+            protectJs() {
+                const input = $('#jsInput').value.trim();
+                if (!input) {
+                    showToast('Please enter JavaScript code to protect', 'error');
+                    return;
+                }
+
+                const protected = Obfuscator.protectJs(input);
+                if (protected) {
+                    APP.currentProtectedJs = protected;
+                    $('#jsOutput').textContent = protected;
+                    $('#copyJsOutput').disabled = false;
+                    $('#saveJsToTheme').disabled = false;
+                    Storage.updateStats('js');
+                    UI.updateStats();
+                    showToast('JavaScript protected successfully!', 'success');
+                } else {
+                    showToast('Failed to protect JavaScript', 'error');
+                }
+            },
+
+            protectCss() {
+                const input = $('#cssInput').value.trim();
+                if (!input) {
+                    showToast('Please enter CSS code to protect', 'error');
+                    return;
+                }
+
+                const protected = Obfuscator.protectCss(input);
+                if (protected) {
+                    APP.currentProtectedCss = protected;
+                    $('#cssOutput').textContent = protected;
+                    $('#copyCssOutput').disabled = false;
+                    $('#saveCssToTheme').disabled = false;
+                    Storage.updateStats('css');
+                    UI.updateStats();
+                    showToast('CSS protected successfully!', 'success');
+                } else {
+                    showToast('Failed to protect CSS', 'error');
+                }
+            },
+
+            copyToClipboard(text, message = 'Copied to clipboard!') {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        showToast(message, 'success');
+                    }).catch(() => {
+                        this.fallbackCopy(text, message);
+                    });
+                } else {
+                    this.fallbackCopy(text, message);
+                }
+            },
+
+            fallbackCopy(text, message) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast(message, 'success');
+                } catch (e) {
+                    showToast('Failed to copy', 'error');
+                }
+                document.body.removeChild(textarea);
+            },
+
+            showSaveModal(type) {
+                APP.pendingSaveType = type;
+                $('#modalThemeName').value = '';
+                UI.openModal('saveModal');
+            },
+
+            saveToTheme() {
+                const themeName = $('#modalThemeName').value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+                if (!themeName) {
+                    showToast('Please enter a theme name', 'error');
+                    return;
+                }
+
+                const themes = Storage.getThemes();
+                let theme = themes.find(t => t.name === themeName);
+                
+                if (!theme) {
+                    theme = {
+                        name: themeName,
+                        created: new Date().toISOString(),
+                        js: null,
+                        css: null
+                    };
+                    themes.push(theme);
+                }
+
+                if (APP.pendingSaveType === 'js' && APP.currentProtectedJs) {
+                    theme.js = APP.currentProtectedJs;
+                } else if (APP.pendingSaveType === 'css' && APP.currentProtectedCss) {
+                    theme.css = APP.currentProtectedCss;
+                }
+
+                Storage.saveThemes(themes);
+                UI.closeModal('saveModal');
+                UI.renderThemes();
+                UI.updateStats();
+                showToast(`Saved to theme: ${themeName}`, 'success');
+            },
+
+            createTheme() {
+                const themeName = $('#themeName').value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+                if (!themeName) {
+                    showToast('Please enter a theme name', 'error');
+                    return;
+                }
+
+                const themes = Storage.getThemes();
+                if (themes.find(t => t.name === themeName)) {
+                    showToast('Theme already exists', 'error');
+                    return;
+                }
+
+                themes.push({
+                    name: themeName,
+                    created: new Date().toISOString(),
+                    js: null,
+                    css: null
+                });
+
+                Storage.saveThemes(themes);
+                $('#themeName').value = '';
+                UI.renderThemes();
+                UI.updateStats();
+                showToast(`Theme created: ${themeName}`, 'success');
+            },
+
+            copyThemeCode(themeName, type) {
+                const themes = Storage.getThemes();
+                const theme = themes.find(t => t.name === themeName);
+                if (theme && theme[type]) {
+                    this.copyToClipboard(theme[type], `${type.toUpperCase()} code copied!`);
+                }
+            },
+
+            showDeleteModal(themeName) {
+                APP.pendingDeleteTheme = themeName;
+                $('#deleteThemeName').textContent = themeName;
+                UI.openModal('deleteModal');
+            },
+
+            deleteTheme() {
+                if (!APP.pendingDeleteTheme) return;
+
+                let themes = Storage.getThemes();
+                themes = themes.filter(t => t.name !== APP.pendingDeleteTheme);
+                Storage.saveThemes(themes);
+                
+                UI.closeModal('deleteModal');
+                UI.renderThemes();
+                UI.updateStats();
+                showToast('Theme deleted', 'success');
+                APP.pendingDeleteTheme = null;
+            },
+
+            bindEvents() {
+                // Login form
+                $('#loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const userId = $('#userId').value.trim();
+                    const password = $('#password').value;
+                    
+                    if (!this.login(userId, password)) {
+                        $('#loginError').style.display = 'block';
+                        setTimeout(() => {
+                            $('#loginError').style.display = 'none';
+                        }, 3000);
+                    }
+                });
+
+                // Logout
+                $('#logoutBtn').addEventListener('click', () => this.logout());
+
+                // Navigation
+                $$('.nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const page = item.dataset.page;
+                        UI.navigateTo(page);
+                    });
+                });
+
+                // Quick action cards
+                $$('.action-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const page = card.dataset.navigate;
+                        UI.navigateTo(page);
+                    });
+                });
+
+                // JS Protection
+                $('#protectJsBtn').addEventListener('click', () => this.protectJs());
+                $('#clearJsInput').addEventListener('click', () => {
+                    $('#jsInput').value = '';
+                    $('#jsOutput').textContent = '';
+                    APP.currentProtectedJs = null;
+                    $('#copyJsOutput').disabled = true;
+                    $('#saveJsToTheme').disabled = true;
+                });
+                $('#copyJsOutput').addEventListener('click', () => {
+                    if (APP.currentProtectedJs) {
+                        this.copyToClipboard(APP.currentProtectedJs, 'Protected JS copied!');
+                    }
+                });
+                $('#saveJsToTheme').addEventListener('click', () => this.showSaveModal('js'));
+
+                // CSS Protection
+                $('#protectCssBtn').addEventListener('click', () => this.protectCss());
+                $('#clearCssInput').addEventListener('click', () => {
+                    $('#cssInput').value = '';
+                    $('#cssOutput').textContent = '';
+                    APP.currentProtectedCss = null;
+                    $('#copyCssOutput').disabled = true;
+                    $('#saveCssToTheme').disabled = true;
+                });
+                $('#copyCssOutput').addEventListener('click', () => {
+                    if (APP.currentProtectedCss) {
+                        this.copyToClipboard(APP.currentProtectedCss, 'Protected CSS copied!');
+                    }
+                });
+                $('#saveCssToTheme').addEventListener('click', () => this.showSaveModal('css'));
+
+                // Theme Manager
+                $('#createThemeBtn').addEventListener('click', () => this.createTheme());
+                $('#themeName').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.createTheme();
+                });
+
+                // Save Modal
+                $('#closeSaveModal').addEventListener('click', () => UI.closeModal('saveModal'));
+                $('#cancelSaveModal').addEventListener('click', () => UI.closeModal('saveModal'));
+                $('#confirmSaveModal').addEventListener('click', () => this.saveToTheme());
+
+                // Delete Modal
+                $('#closeDeleteModal').addEventListener('click', () => UI.closeModal('deleteModal'));
+                $('#cancelDeleteModal').addEventListener('click', () => UI.closeModal('deleteModal'));
+                $('#confirmDeleteModal').addEventListener('click', () => this.deleteTheme());
+
+                // Close modals on overlay click
+                $$('.modal-overlay').forEach(overlay => {
+                    overlay.addEventListener('click', (e) => {
+                        if (e.target === overlay) {
+                            overlay.classList.remove('active');
+                        }
+                    });
+                });
+
+                // Escape key to close modals
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        $$('.modal-overlay.active').forEach(modal => {
+                            modal.classList.remove('active');
+                        });
+                    }
+                });
+            }
+        };
+
+        // Make App globally accessible for inline event handlers
+        window.App = App;
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+    </script>
+</body>
+</html>
