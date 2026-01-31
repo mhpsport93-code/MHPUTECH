@@ -1,298 +1,484 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>DesignHub – Web Design Showcase</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MHPUTECH Design Hub - Web Developer Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Reset & Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-<style>
-:root{
-  --bg:#f6f8fb;
-  --card:#ffffff;
-  --border:#e6eaf0;
-  --text:#0f172a;
-  --muted:#64748b;
-  --primary:#2563eb;
-}
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f8f9fa;
+      color: #1a1a2e;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
 
-*{margin:0;padding:0;box-sizing:border-box}
+    /* Fade-in Animation */
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
 
-body{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto;
-  background:var(--bg);
-  color:var(--text);
-}
+    .fade-in-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-/* ===== HEADER ===== */
-header{
-  background:#fff;
-  border-bottom:1px solid var(--border);
-}
+    /* Header */
+    .header {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-/* TOP BAR */
-.topbar{
-  height:64px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 18px;
-}
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
 
-/* LOGO */
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-size:18px;
-  font-weight:600;
-}
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
 
-.brand-icon{
-  width:38px;
-  height:38px;
-  border-radius:12px;
-  background:linear-gradient(135deg,#60a5fa,#2563eb);
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-}
+    .brand-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
 
-/* HEADER ACTIONS */
-.header-actions{
-  display:flex;
-  gap:10px;
-}
+    .brand-name span {
+      color: #6366f1;
+    }
 
-.icon-btn{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  border:1px solid var(--border);
-  background:#fff;
-}
+    /* Main Container */
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
 
-/* ===== TOP GRID (DESIGN CATEGORIES) ===== */
-.site-bar{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:12px;
-  padding:16px;
-  background:#fff;
-}
+    /* Section Title */
+    .section-header {
+      margin-bottom: 1.5rem;
+    }
 
-.site-bar a{
-  text-decoration:none;
-  padding:12px;
-  font-size:14px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  color:#334155;
-  text-align:center;
-  font-weight:600;
-  transition:.2s;
-}
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 0.5rem;
+    }
 
-.site-bar a.active,
-.site-bar a:hover{
-  background:#eef2ff;
-  border-color:#c7d2fe;
-  color:#1d4ed8;
-}
+    .section-subtitle {
+      font-size: 0.95rem;
+      color: #6b7280;
+    }
 
-/* ===== WRAPPER ===== */
-.wrapper{
-  max-width:1100px;
-  margin:auto;
-  padding:30px 16px 80px;
-}
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
 
-/* ===== INTRO CARD ===== */
-.search-card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:22px;
-  margin-bottom:26px;
-  font-size:15px;
-  color:var(--muted);
-}
+    @media (min-width: 640px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+      }
+    }
 
-/* ===== DESIGN CARDS ===== */
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:20px;
-}
+    @media (min-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
 
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:24px;
-  transition:.25s;
-}
+    @media (min-width: 1100px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
 
-.card:hover{
-  box-shadow:0 12px 30px rgba(0,0,0,.06);
-  transform:translateY(-3px);
-}
+    /* Dashboard Cards */
+    .dashboard-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.75rem 1rem;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      text-decoration: none;
+      color: #1a1a2e;
+      transition: all 0.25s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      cursor: pointer;
+    }
 
-.card-icon{
-  width:48px;
-  height:48px;
-  border-radius:16px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-  margin-bottom:14px;
-}
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+      border-color: #d1d5db;
+    }
 
-.blue{background:#e0edff}
-.green{background:#dcfce7}
-.purple{background:#ede9fe}
+    .card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.875rem;
+      font-size: 1.5rem;
+      transition: transform 0.25s ease;
+    }
 
-.card h3{
-  font-size:18px;
-  margin-bottom:8px;
-}
+    .dashboard-card:hover .card-icon {
+      transform: scale(1.08);
+    }
 
-.card p{
-  font-size:14px;
-  color:var(--muted);
-  line-height:1.6;
-}
+    .card-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-align: center;
+      color: #374151;
+    }
 
-/* ===== STATS (DESIGN INFO) ===== */
-.stats{
-  margin-top:30px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:22px;
-}
+    /* Icon Colors */
+    .icon-blogger {
+      background: #fff5f5;
+      color: #f97316;
+    }
 
-.stat-row{
-  display:flex;
-  justify-content:space-between;
-  padding:12px 0;
-  border-bottom:1px solid var(--border);
-  font-size:14px;
-}
+    .icon-github {
+      background: #f3f4f6;
+      color: #1f2937;
+    }
 
-.stat-row:last-child{
-  border-bottom:none;
-}
+    .icon-cloudflare {
+      background: #fef3c7;
+      color: #f59e0b;
+    }
 
-/* ===== FADE ANIMATION ===== */
-.fade{
-  opacity:0;
-  transform:translateY(30px);
-  transition:opacity .8s ease, transform .8s ease;
-}
+    .icon-google {
+      background: #eff6ff;
+      color: #3b82f6;
+    }
 
-.fade.show{
-  opacity:1;
-  transform:translateY(0);
-}
-</style>
+    .icon-globe {
+      background: #f0fdf4;
+      color: #22c55e;
+    }
+
+    .icon-code {
+      background: #faf5ff;
+      color: #a855f7;
+    }
+
+    .icon-dashboard {
+      background: #ecfeff;
+      color: #06b6d4;
+    }
+
+    .icon-license {
+      background: #fdf2f8;
+      color: #ec4899;
+    }
+
+    .icon-encryption {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    /* Info Section */
+    .info-section {
+      margin-top: 3rem;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .info-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-title i {
+      color: #6366f1;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 900px) {
+      .info-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      background: #f9fafb;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.375rem;
+    }
+
+    .info-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 3rem;
+      padding: 1.5rem;
+      text-align: center;
+      border-top: 1px solid #e5e7eb;
+      background: #ffffff;
+    }
+
+    .footer-text {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    .footer-text a {
+      color: #6366f1;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+
+    /* Animation delays */
+    .delay-1 { transition-delay: 0.05s; }
+    .delay-2 { transition-delay: 0.1s; }
+    .delay-3 { transition-delay: 0.15s; }
+    .delay-4 { transition-delay: 0.2s; }
+    .delay-5 { transition-delay: 0.25s; }
+    .delay-6 { transition-delay: 0.3s; }
+    .delay-7 { transition-delay: 0.35s; }
+    .delay-8 { transition-delay: 0.4s; }
+    .delay-9 { transition-delay: 0.45s; }
+  </style>
 </head>
-
 <body>
 
-<header class="fade">
+  <!-- Header -->
+  <header class="header fade-in-up">
+    <div class="header-content">
+      <div class="logo-icon">
+        <i class="fa-solid fa-code"></i>
+      </div>
+      <h1 class="brand-name">MHPUTECH <span>Design Hub</span></h1>
+    </div>
+  </header>
 
-  <div class="topbar">
-    <div class="brand">
-      <div class="brand-icon">🎨</div>
-      DesignHub
+  <!-- Main Content -->
+  <main class="main-container">
+    
+    <!-- Section Header -->
+    <div class="section-header fade-in-up">
+      <h2 class="section-title">Quick Access Dashboard</h2>
+      <p class="section-subtitle">Your essential web development tools and platforms in one place.</p>
     </div>
 
-    <div class="header-actions">
-      <button class="icon-btn"></button>
-      <button class="icon-btn"></button>
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+      
+      <a href="https://www.blogger.com" target="_blank" rel="noopener noreferrer" class="dashboard-card fade-in-up delay-1">
+        <div class="card-icon icon-blogger">
+          <i class="fa-brands fa-blogger"></i>
+        </div>
+        <span class="card-label">Blogger</span>
+      </a>
+
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="dashboard-card fade-in-up delay-2">
+        <div class="card-icon icon-github">
+          <i class="fa-brands fa-github"></i>
+        </div>
+        <span class="card-label">GitHub</span>
+      </a>
+
+      <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" class="dashboard-card fade-in-up delay-3">
+        <div class="card-icon icon-cloudflare">
+          <i class="fa-solid fa-cloud"></i>
+        </div>
+        <span class="card-label">Cloudflare</span>
+      </a>
+
+      <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="dashboard-card fade-in-up delay-4">
+        <div class="card-icon icon-google">
+          <i class="fa-brands fa-google"></i>
+        </div>
+        <span class="card-label">Google</span>
+      </a>
+
+      <a href="https://mhputech.site" target="_blank" rel="noopener noreferrer" class="dashboard-card fade-in-up delay-5">
+        <div class="card-icon icon-globe">
+          <i class="fa-solid fa-globe"></i>
+        </div>
+        <span class="card-label">MHPUTECH.site</span>
+      </a>
+
+      <a href="https://script.google.com" target="_blank" rel="noopener noreferrer" class="dashboard-card fade-in-up delay-6">
+        <div class="card-icon icon-code">
+          <i class="fa-solid fa-code"></i>
+        </div>
+        <span class="card-label">Apps Script</span>
+      </a>
+
+      <a href="https://www.blogger.com/u/0/blog/posts/2500315885966746890" class="dashboard-card fade-in-up delay-7">
+        <div class="card-icon icon-dashboard">
+          <i class="fa-solid fa-gauge"></i>
+        </div>
+        <span class="card-label">Dashboard</span>
+      </a>
+
+      <a href="https://mhpsport93-code.github.io/MHPUTECH/license.html" class="dashboard-card fade-in-up delay-8">
+        <div class="card-icon icon-license">
+          <i class="fa-solid fa-id-card"></i>
+        </div>
+        <span class="card-label">License</span>
+      </a>
+
+      <a href="https://mhpsport93-code.github.io/MHPUTECH/encryption.html" class="dashboard-card fade-in-up delay-9">
+        <div class="card-icon icon-encryption">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <span class="card-label">Encryption</span>
+      </a>
+
     </div>
-  </div>
 
-  <!-- DESIGN CATEGORY GRID -->
-  <div class="site-bar fade">
-    <a class="active" href="https://www.blogger.com/u/0/blog/posts/2500315885966746890">MHPUTECH DASH</a>
-    <a href="#">Landing Pages</a>
-    <a href="#">Business Sites</a>
-    <a href="#">Portfolio</a>
-    <a href="#">Dashboards</a>
-    <a href="#">E-commerce</a>
-    <a href="#">Blogs</a>
-    <a href="#">UI Kits</a>
-  </div>
+    <!-- Info Section -->
+    <section class="info-section fade-in-up">
+      <h3 class="info-title">
+        <i class="fa-solid fa-circle-info"></i>
+        Dashboard Overview
+      </h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Design Style</span>
+          <span class="info-value">Modern & Clean</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Layout Type</span>
+          <span class="info-value">Responsive Grid</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">UI Focus</span>
+          <span class="info-value">Developer Tools</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Use Case</span>
+          <span class="info-value">Quick Access Hub</span>
+        </div>
+      </div>
+    </section>
 
-</header>
+  </main>
 
-<div class="wrapper">
+  <!-- Footer -->
+  <footer class="footer fade-in-up">
+    <p class="footer-text">
+      © 2024 <a href="https://mhputech.site" target="_blank" rel="noopener noreferrer">MHPUTECH</a>. Built for web developers.
+    </p>
+  </footer>
 
-  <!-- INTRO -->
-  <div class="search-card fade">
-    Discover modern, responsive and performance-focused website designs.
-    Built for clean UI, smooth UX and professional presentation.
-  </div>
+  <!-- JavaScript for Scroll Animations -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // IntersectionObserver for fade-in animations
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+      };
 
-  <!-- DESIGN TYPES -->
-  <div class="cards">
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            // Optional: stop observing after animation
+            // observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
 
-    <div class="card fade">
-      <div class="card-icon blue">🖥️</div>
-      <h3>Business Website</h3>
-      <p>
-        Corporate website design with clean layout, branding focus
-        and conversion-ready structure.
-      </p>
-    </div>
+      // Observe all elements with fade-in-up class
+      const fadeElements = document.querySelectorAll('.fade-in-up');
+      fadeElements.forEach(el => {
+        observer.observe(el);
+      });
 
-    <div class="card fade">
-      <div class="card-icon green">🎨</div>
-      <h3>Creative Portfolio</h3>
-      <p>
-        Minimal portfolio design for designers & developers
-        to showcase projects professionally.
-      </p>
-    </div>
-
-    <div class="card fade">
-      <div class="card-icon purple">📊</div>
-      <h3>Dashboard UI</h3>
-      <p>
-        Modern SaaS dashboard design with cards, stats
-        and clean data presentation.
-      </p>
-    </div>
-
-  </div>
-
-  <!-- DESIGN INFO -->
-  <div class="stats fade">
-    <div class="stat-row"><span>Design Style</span><strong>Modern & Clean</strong></div>
-    <div class="stat-row"><span>Layout Type</span><strong>Responsive</strong></div>
-    <div class="stat-row"><span>UI Focus</span><strong>UX & Performance</strong></div>
-    <div class="stat-row"><span>Use Case</span><strong>Web Projects</strong></div>
-  </div>
-
-</div>
-
-<script>
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){
-      entry.target.classList.add("show");
-    }
-  });
-},{threshold:0.15});
-
-document.querySelectorAll(".fade").forEach(el=>{
-  observer.observe(el);
-});
-</script>
+      // Trigger immediate visibility for elements already in viewport
+      setTimeout(() => {
+        fadeElements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight) {
+            el.classList.add('visible');
+          }
+        });
+      }, 100);
+    });
+  </script>
 
 </body>
 </html>
