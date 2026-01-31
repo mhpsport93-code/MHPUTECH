@@ -1,241 +1,298 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard • Clean</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-S..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<title>DesignHub – Web Design Showcase</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #ffffff;
-      color: #111111;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+<style>
+:root{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --border:#e6eaf0;
+  --text:#0f172a;
+  --muted:#64748b;
+  --primary:#2563eb;
+}
 
-    /* ── Header ── */
-    header {
-      height: 64px;
-      border-bottom: 1px solid #e5e5e5;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #ffffff;
-      position: sticky;
-      top: 0;
-      z-index: 90;
-    }
+*{margin:0;padding:0;box-sizing:border-box}
 
-    .logo-title {
-      font-size: 1.375rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
+body{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto;
+  background:var(--bg);
+  color:var(--text);
+}
 
-    /* ── Sidebar ── */
-    .sidebar {
-      width: 240px;
-      background: #ffffff;
-      border-right: 1px solid #e5e5e5;
-      position: fixed;
-      top: 64px;
-      bottom: 0;
-      left: 0;
-      padding: 24px 16px;
-      overflow-y: auto;
-      transition: transform 0.25s ease;
-      z-index: 80;
-    }
+/* ===== HEADER ===== */
+header{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+}
 
-    .sidebar nav ul {
-      list-style: none;
-    }
+/* TOP BAR */
+.topbar{
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+}
 
-    .sidebar nav a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      color: #333333;
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      border-radius: 10px;
-      margin: 4px 0;
-      transition: all 0.15s ease;
-    }
+/* LOGO */
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:18px;
+  font-weight:600;
+}
 
-    .sidebar nav a:hover,
-    .sidebar nav a.active {
-      background: #f5f5f5;
-      color: #000000;
-    }
+.brand-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#60a5fa,#2563eb);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+}
 
-    .sidebar nav a i {
-      width: 20px;
-      text-align: center;
-      opacity: 0.7;
-    }
+/* HEADER ACTIONS */
+.header-actions{
+  display:flex;
+  gap:10px;
+}
 
-    .sidebar nav a.active i {
-      opacity: 1;
-    }
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:#fff;
+}
 
-    /* ── Main Content ── */
-    main {
-      margin-left: 240px;
-      padding: 32px 40px;
-      flex: 1;
-      transition: margin-left 0.25s ease;
-    }
+/* ===== TOP GRID (DESIGN CATEGORIES) ===== */
+.site-bar{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+  padding:16px;
+  background:#fff;
+}
 
-    .grid-container {
-      max-width: 1100px;
-      margin: 0 auto 64px;
-    }
+.site-bar a{
+  text-decoration:none;
+  padding:12px;
+  font-size:14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  color:#334155;
+  text-align:center;
+  font-weight:600;
+  transition:.2s;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      justify-items: center;
-    }
+.site-bar a.active,
+.site-bar a:hover{
+  background:#eef2ff;
+  border-color:#c7d2fe;
+  color:#1d4ed8;
+}
 
-    .card-btn {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      max-width: 180px;
-      background: #ffffff;
-      border: 1px solid #e2e2e2;
-      border-radius: 16px;
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: #111111;
-      cursor: pointer;
-      transition: all 0.18s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 16px;
-      line-height: 1.3;
-    }
+/* ===== WRAPPER ===== */
+.wrapper{
+  max-width:1100px;
+  margin:auto;
+  padding:30px 16px 80px;
+}
 
-    .card-btn:hover {
-      border-color: #c0c0c0;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-      transform: translateY(-2px);
-    }
+/* ===== INTRO CARD ===== */
+.search-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:22px;
+  margin-bottom:26px;
+  font-size:15px;
+  color:var(--muted);
+}
 
-    /* ── About Section ── */
-    .about-section {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
+/* ===== DESIGN CARDS ===== */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+}
 
-    .about-section h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 1.2em;
-      color: #000;
-    }
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:24px;
+  transition:.25s;
+}
 
-    .about-section p {
-      font-size: 1.03rem;
-      line-height: 1.6;
-      color: #444;
-      margin-bottom: 1.4em;
-    }
+.card:hover{
+  box-shadow:0 12px 30px rgba(0,0,0,.06);
+  transform:translateY(-3px);
+}
 
-    /* ── Mobile ── */
-    @media (max-width: 1023px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
+.card-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  margin-bottom:14px;
+}
 
-      main {
-        margin-left: 0;
-      }
+.blue{background:#e0edff}
+.green{background:#dcfce7}
+.purple{background:#ede9fe}
 
-      .grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-      }
+.card h3{
+  font-size:18px;
+  margin-bottom:8px;
+}
 
-      .card-btn {
-        max-width: 160px;
-        font-size: 0.98rem;
-      }
-    }
+.card p{
+  font-size:14px;
+  color:var(--muted);
+  line-height:1.6;
+}
 
-    @media (max-width: 640px) {
-      header {
-        padding: 0 16px;
-      }
+/* ===== STATS (DESIGN INFO) ===== */
+.stats{
+  margin-top:30px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:22px;
+}
 
-      main {
-        padding: 24px 16px;
-      }
+.stat-row{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+}
 
-      .grid {
-        gap: 16px;
-      }
+.stat-row:last-child{
+  border-bottom:none;
+}
 
-      .card-btn {
-        max-width: 140px;
-        font-size: 0.94rem;
-      }
-    }
-  </style>
+/* ===== FADE ANIMATION ===== */
+.fade{
+  opacity:0;
+  transform:translateY(30px);
+  transition:opacity .8s ease, transform .8s ease;
+}
+
+.fade.show{
+  opacity:1;
+  transform:translateY(0);
+}
+</style>
 </head>
+
 <body>
 
-  <header>
-    <div class="logo-title">Dashboard</div>
-  </header>
+<header class="fade">
 
-  <div class="sidebar">
-    <nav>
-      <ul>
-        <li><a href="#" class="active"><i class="fa-solid fa-gauge"></i> Overview</a></li>
-        <li><a href="#"><i class="fa-solid fa-chart-line"></i> Analytics</a></li>
-        <li><a href="#"><i class="fa-solid fa-users"></i> Customers</a></li>
-        <li><a href="#"><i class="fa-solid fa-box"></i> Products</a></li>
-        <li><a href="#"><i class="fa-solid fa-receipt"></i> Orders</a></li>
-        <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
-      </ul>
-    </nav>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-icon">🎨</div>
+      DesignHub
+    </div>
+
+    <div class="header-actions">
+      <button class="icon-btn"></button>
+      <button class="icon-btn"></button>
+    </div>
   </div>
 
-  <main>
-    <div class="grid-container">
-      <div class="grid">
-        <button class="card-btn">Analytics</button>
-        <button class="card-btn">Customers</button>
-        <button class="card-btn">Orders</button>
-        <button class="card-btn">Products</button>
-        <button class="card-btn">Messages</button>
-        <button class="card-btn">Settings</button>
-      </div>
+  <!-- DESIGN CATEGORY GRID -->
+  <div class="site-bar fade">
+    <a class="active" href="https://www.blogger.com/u/0/blog/posts/2500315885966746890">MHPUTECH DASH</a>
+    <a href="#">Landing Pages</a>
+    <a href="#">Business Sites</a>
+    <a href="#">Portfolio</a>
+    <a href="#">Dashboards</a>
+    <a href="#">E-commerce</a>
+    <a href="#">Blogs</a>
+    <a href="#">UI Kits</a>
+  </div>
+
+</header>
+
+<div class="wrapper">
+
+  <!-- INTRO -->
+  <div class="search-card fade">
+    Discover modern, responsive and performance-focused website designs.
+    Built for clean UI, smooth UX and professional presentation.
+  </div>
+
+  <!-- DESIGN TYPES -->
+  <div class="cards">
+
+    <div class="card fade">
+      <div class="card-icon blue">🖥️</div>
+      <h3>Business Website</h3>
+      <p>
+        Corporate website design with clean layout, branding focus
+        and conversion-ready structure.
+      </p>
     </div>
 
-    <div class="about-section">
-      <h2>Welcome to your dashboard</h2>
-      <p>This clean workspace gives you quick access to the most important areas of your business. Everything you need is just one click away.</p>
-      <p>Use the cards above to jump to frequently used sections or explore the sidebar menu for more detailed options and reports.</p>
+    <div class="card fade">
+      <div class="card-icon green">🎨</div>
+      <h3>Creative Portfolio</h3>
+      <p>
+        Minimal portfolio design for designers & developers
+        to showcase projects professionally.
+      </p>
     </div>
-  </main>
+
+    <div class="card fade">
+      <div class="card-icon purple">📊</div>
+      <h3>Dashboard UI</h3>
+      <p>
+        Modern SaaS dashboard design with cards, stats
+        and clean data presentation.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- DESIGN INFO -->
+  <div class="stats fade">
+    <div class="stat-row"><span>Design Style</span><strong>Modern & Clean</strong></div>
+    <div class="stat-row"><span>Layout Type</span><strong>Responsive</strong></div>
+    <div class="stat-row"><span>UI Focus</span><strong>UX & Performance</strong></div>
+    <div class="stat-row"><span>Use Case</span><strong>Web Projects</strong></div>
+  </div>
+
+</div>
+
+<script>
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add("show");
+    }
+  });
+},{threshold:0.15});
+
+document.querySelectorAll(".fade").forEach(el=>{
+  observer.observe(el);
+});
+</script>
 
 </body>
 </html>
