@@ -1,0 +1,2967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worker Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --sidebar-width: 260px;
+        }
+
+        body {
+            background: var(--light);
+            min-height: 100vh;
+        }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .loader-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: var(--shadow);
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--warning); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Login Page */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            animation: fadeUp 0.5s ease;
+        }
+
+        @keyframes fadeUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .login-card h1 {
+            text-align: center;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .login-card p {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .app-container.active {
+            display: block;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 70px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .profile-btn:hover {
+            background: var(--light);
+        }
+
+        .profile-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+        }
+
+        .profile-photo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            min-width: 200px;
+            display: none;
+            overflow: hidden;
+            animation: fadeDown 0.2s ease;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+        }
+
+        @keyframes fadeDown {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: var(--light);
+        }
+
+        .dropdown-item.danger {
+            color: var(--danger);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 70px;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: white;
+            box-shadow: var(--shadow);
+            padding: 20px 0;
+            overflow-y: auto;
+            transition: all 0.3s;
+            z-index: 90;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin: 4px 12px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 24px;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+        .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .stat-icon.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+        .stat-info h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .stat-info p {
+            color: var(--secondary);
+            font-size: 14px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--light);
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        /* Badge */
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+
+        /* Worker Cards Grid */
+        .workers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .worker-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .worker-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .worker-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--secondary);
+            overflow: hidden;
+        }
+
+        .worker-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .worker-card h3 {
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .worker-card p {
+            color: var(--secondary);
+            font-size: 14px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--secondary);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Time inputs */
+        .time-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--secondary);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            padding: 16px 24px;
+            text-align: center;
+            color: var(--secondary);
+            font-size: 14px;
+            margin-left: var(--sidebar-width);
+            border-top: 1px solid var(--border);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content, .footer {
+                margin-left: 0;
+            }
+
+            .profile-name {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar select, .filter-bar input {
+            padding: 10px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--secondary);
+        }
+
+        .empty-state i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Calculation display */
+        .calc-display {
+            background: var(--light);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .calc-row:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--primary);
+        }
+
+        /* Print styles */
+        @media print {
+            .sidebar, .header, .footer, .btn, .filter-bar {
+                display: none !important;
+            }
+            .main-content {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ddd;
+            }
+        }
+
+        /* Action buttons */
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            width: 36px;
+            height: 36px;
+        }
+
+        /* Today status highlight */
+        .today-highlight {
+            background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+            border-left: 4px solid var(--primary);
+        }
+
+        /* Worker detail view */
+        .worker-detail-header {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 24px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .worker-detail-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: var(--secondary);
+            overflow: hidden;
+        }
+
+        .worker-detail-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .worker-detail-info h2 {
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .worker-detail-info p {
+            color: var(--secondary);
+            margin-bottom: 4px;
+        }
+
+        /* Summary cards row */
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .summary-card h4 {
+            color: var(--secondary);
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .summary-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .summary-card .value.success { color: var(--success); }
+        .summary-card .value.danger { color: var(--danger); }
+        .summary-card .value.warning { color: var(--warning); }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader-overlay" id="loader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Login Page -->
+    <div class="login-page" id="loginPage">
+        <div class="login-card">
+            <h1><i class="fas fa-users-cog"></i></h1>
+            <h1>Worker Management</h1>
+            <p>Login to continue</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Admin/Worker ID</label>
+                    <input type="text" id="loginId" placeholder="Enter your ID" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div class="app-container" id="appContainer">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <i class="fas fa-hard-hat"></i> Chandan Ji Team
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="profile-dropdown">
+                    <button class="profile-btn" id="profileBtn">
+                        <div class="profile-photo" id="headerPhoto">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="profile-name" id="headerName">User</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <div class="dropdown-item" onclick="showSection('profile')">
+                            <i class="fas fa-user-circle"></i> Profile
+                        </div>
+                        <div class="dropdown-item danger" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <ul class="sidebar-nav" id="sidebarNav">
+                <!-- Nav items will be injected by JS -->
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Dashboard (Admin) -->
+            <section class="page-section" id="section-dashboard">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-chart-line"></i> Today's Status</h1>
+                </div>
+                <div class="stats-grid" id="adminStats">
+                    <!-- Stats injected by JS -->
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-calendar-day"></i> Today's Attendance</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="todayAttendanceTable">
+                                <thead>
+                                    <tr>
+                                        <th>Worker</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                        <th>Dehari</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Worker Dashboard -->
+            <section class="page-section" id="section-worker-dashboard">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-home"></i> My Dashboard</h1>
+                </div>
+                <div class="stats-grid" id="workerStats">
+                    <!-- Stats injected by JS -->
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-plus-circle"></i> Add Today's Dehari</h2>
+                    </div>
+                    <div class="card-body" id="dehariFormContainer">
+                        <!-- Form or message injected by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add Worker (Admin) -->
+            <section class="page-section" id="section-add-worker">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-user-plus"></i> Add New Worker</h1>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <form id="addWorkerForm">
+                            <div class="form-group">
+                                <label>Worker ID</label>
+                                <input type="text" id="newWorkerId" placeholder="e.g., W001" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="newWorkerPassword" placeholder="Create password" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="newWorkerName" placeholder="Worker's full name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Joining Date</label>
+                                <input type="date" id="newWorkerJoiningDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Daily Salary (₹)</label>
+                                <input type="number" id="newWorkerSalary" placeholder="e.g., 500" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Worker
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- All Workers (Admin) -->
+            <section class="page-section" id="section-all-workers">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-users"></i> All Workers</h1>
+                </div>
+                <div class="workers-grid" id="workersGrid">
+                    <!-- Worker cards injected by JS -->
+                </div>
+            </section>
+
+            <!-- Worker Detail (Admin) -->
+            <section class="page-section" id="section-worker-detail">
+                <div class="page-header">
+                    <button class="btn btn-secondary" onclick="showSection('all-workers')">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                </div>
+                <div id="workerDetailContent">
+                    <!-- Content injected by JS -->
+                </div>
+            </section>
+
+            <!-- Dehari Records -->
+            <section class="page-section" id="section-dehari-records">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-clipboard-list"></i> Dehari Records</h1>
+                </div>
+                <div class="filter-bar" id="dehariFilterBar">
+                    <!-- Filters injected by JS -->
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="dehariTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Worker</th>
+                                        <th>Location</th>
+                                        <th>Time</th>
+                                        <th>Dehari</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payments (Admin) -->
+            <section class="page-section" id="section-payments">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-money-bill-wave"></i> Payments</h1>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Add Payment</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="addPaymentForm">
+                            <div class="form-group">
+                                <label>Select Worker</label>
+                                <select id="paymentWorkerId" required>
+                                    <option value="">Select worker</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount (₹)</label>
+                                <input type="number" id="paymentAmount" placeholder="Enter amount" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="paymentDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Notes</label>
+                                <textarea id="paymentNotes" rows="2" placeholder="Optional notes"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Add Payment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h2 class="card-title">Payment History</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="filter-bar">
+                            <select id="paymentFilterWorker" onchange="renderPayments()">
+                                <option value="">All Workers</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="paymentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Worker</th>
+                                        <th>Amount</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chutti Management (Admin) -->
+            <section class="page-section" id="section-chutti">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-calendar-times"></i> Chutti Management</h1>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Add/Edit Chutti</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="addChuttiForm">
+                            <div class="form-group">
+                                <label>Select Worker</label>
+                                <select id="chuttiWorkerId" required>
+                                    <option value="">Select worker</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="chuttiDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Reason</label>
+                                <textarea id="chuttiReason" rows="2" placeholder="Reason for chutti"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-plus"></i> Add Chutti
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h2 class="card-title">Chutti History</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="filter-bar">
+                            <select id="chuttiFilterWorker" onchange="renderChutti()">
+                                <option value="">All Workers</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="chuttiTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Worker</th>
+                                        <th>Reason</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports -->
+            <section class="page-section" id="section-reports">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-file-pdf"></i> Reports</h1>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <form id="reportForm">
+                            <div class="form-group" id="reportWorkerSelect" style="display: none;">
+                                <label>Select Worker</label>
+                                <select id="reportWorkerId">
+                                    <option value="">All Workers</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Select Month</label>
+                                <input type="month" id="reportMonth" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-file-pdf"></i> Generate PDF Report
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 20px; display: none;" id="reportPreview">
+                    <div class="card-header">
+                        <h2 class="card-title">Report Preview</h2>
+                        <button class="btn btn-success btn-sm" onclick="downloadPDF()">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                         <button class="btn btn-success btn-sm" onclick="sharePDFWhatsApp()">
+        <i class="fab fa-whatsapp"></i>  WhatsApp
+    </button>
+                    </div>
+                    <div class="card-body" id="reportContent">
+                        <!-- Report content -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Records (Worker) -->
+            <section class="page-section" id="section-my-records">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-history"></i> My Records</h1>
+                </div>
+                <div class="filter-bar">
+                    <input type="month" id="myRecordsMonth" onchange="renderMyRecords()">
+                </div>
+                <div class="summary-row" id="myRecordsSummary">
+                    <!-- Summary injected by JS -->
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Dehari Records</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="myDehariTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Location</th>
+                                        <th>Time</th>
+                                        <th>Dehari</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Worker List (Worker View) -->
+            <section class="page-section" id="section-worker-list">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-address-book"></i> Worker List</h1>
+                </div>
+                <div class="workers-grid" id="workerListGrid">
+                    <!-- Worker cards (names only) injected by JS -->
+                </div>
+            </section>
+
+            <!-- Profile -->
+            <section class="page-section" id="section-profile">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="fas fa-user-circle"></i> My Profile</h1>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div style="text-align: center; margin-bottom: 24px;">
+                            <div class="worker-avatar" id="profileAvatar" style="width: 120px; height: 120px; margin: 0 auto 16px;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;" onchange="uploadPhoto(event)">
+                            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('profilePhotoInput').click()">
+                                <i class="fas fa-camera"></i> Change Photo
+                            </button>
+                        </div>
+                        <form id="profileForm">
+                            <div class="form-group">
+                                <label>Worker ID</label>
+                                <input type="text" id="profileId" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="profileName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Joining Date</label>
+                                <input type="date" id="profileJoiningDate" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Daily Salary (₹)</label>
+                                <input type="number" id="profileSalary" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Helpers / Team</label>
+                                <textarea id="profileHelpers" rows="2" placeholder="List of helpers"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Profile
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 Chandan Ji Team. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Edit Chutti Modal -->
+    <div class="modal-overlay" id="editChuttiModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Chutti</h3>
+                <button class="modal-close" onclick="closeModal('editChuttiModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editChuttiForm">
+                    <input type="hidden" id="editChuttiId">
+                    <div class="form-group">
+                        <label>Reason</label>
+                        <textarea id="editChuttiReason" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editChuttiModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveChuttiEdit()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Worker Modal -->
+    <div class="modal-overlay" id="editWorkerModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Worker</h3>
+                <button class="modal-close" onclick="closeModal('editWorkerModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editWorkerForm">
+                    <input type="hidden" id="editWorkerIdField">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="editWorkerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Daily Salary (₹)</label>
+                        <input type="number" id="editWorkerSalary" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password (leave blank to keep current)</label>
+                        <input type="password" id="editWorkerPassword" placeholder="Enter new password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editWorkerModal')">Cancel</button>
+                <button class="btn btn-danger" onclick="deleteWorker()" style="margin-right: auto;">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+                <button class="btn btn-primary" onclick="saveWorkerEdit()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIGURATION =====
+        const API_URL = "https://chandanjiteam.kumarthakurabhishek41.workers.dev/";
+        const ADMIN_ID = "ADMIN001";
+        const ADMIN_PASSWORD = "admin@123";
+
+        // ===== GLOBAL STATE =====
+        let DB = {
+            workers: [],
+            dehari: [],
+            payments: [],
+            chutti: []
+        };
+
+        let currentUser = null;
+        let isAdmin = false;
+
+        // ===== UTILITY FUNCTIONS =====
+        function showLoader() {
+            document.getElementById('loader').classList.add('active');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.remove('active');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function getToday() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function getCurrentTime() {
+            return new Date().toTimeString().slice(0, 5);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function formatCurrency(amount) {
+            return '₹' + Number(amount || 0).toLocaleString('en-IN');
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // ===== API FUNCTIONS =====
+        async function loadData() {
+            showLoader();
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'load' })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result && typeof result === 'object') {
+                    DB = {
+                        workers: Array.isArray(result.workers) ? result.workers : [],
+                        dehari: Array.isArray(result.dehari) ? result.dehari : [],
+                        payments: Array.isArray(result.payments) ? result.payments : [],
+                        chutti: Array.isArray(result.chutti) ? result.chutti : []
+                    };
+                } else {
+                    throw new Error('Invalid response format');
+                }
+            } catch (error) {
+                console.error('Load error:', error);
+                showToast('Failed to load data from server!', 'error');
+                DB = { workers: [], dehari: [], payments: [], chutti: [] };
+            }
+            hideLoader();
+        }
+
+        async function saveData() {
+            showLoader();
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'save', data: DB })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (!result || result.success !== true) {
+                    throw new Error('Save failed');
+                }
+
+                // Reload from server to ensure consistency
+                await loadData();
+                showToast('Data saved successfully!', 'success');
+            } catch (error) {
+                console.error('Save error:', error);
+                showToast('Failed to save data! Please try again.', 'error');
+                alert('ERROR: Failed to save data to server!\n\nPlease check your internet connection and try again.');
+            }
+            hideLoader();
+        }
+
+        // ===== DEHARI CALCULATION =====
+        function calculateDehari(startTime, endTime) {
+            // Parse times
+            const [startH, startM] = startTime.split(':').map(Number);
+            const [endH, endM] = endTime.split(':').map(Number);
+
+            let startMinutes = startH * 60 + startM;
+            let endMinutes = endH * 60 + endM;
+
+            // Handle overnight shifts (end time is next day)
+            if (endMinutes <= startMinutes) {
+                endMinutes += 24 * 60; // Add 24 hours
+            }
+
+            const totalMinutes = endMinutes - startMinutes;
+            const totalHours = totalMinutes / 60;
+
+            // Calculate dehari (8 hours = 1 dehari)
+            const dehari = totalHours / 8;
+
+            // Round to nearest 0.5
+            return Math.round(dehari * 2) / 2;
+        }
+
+        function calculateAmount(dehari, dailySalary) {
+            return dehari * dailySalary;
+        }
+
+        // ===== AUTO CHUTTI =====
+        function checkAutoChutti() {
+            const today = getToday();
+            DB.workers.forEach(worker => {
+                // Check if worker has dehari for today
+                const hasDehari = DB.dehari.some(d => d.workerId === worker.id && d.date === today);
+                // Check if already has chutti for today
+                const hasChutti = DB.chutti.some(c => c.workerId === worker.id && c.date === today);
+
+                // We don't auto-create chutti here - it's shown in dashboard as "absent"
+            });
+        }
+
+        
+        // ===== AUTHENTICATION =====
+function checkSession() {
+    const session = localStorage.getItem('wms_session');
+    if (session) {
+        const data = JSON.parse(session);
+        currentUser = data.user;
+        isAdmin = data.isAdmin;
+        return true;
+    }
+    return false;
+}
+
+function saveSession() {
+    localStorage.setItem(
+        'wms_session',
+        JSON.stringify({
+            user: currentUser,
+            isAdmin: isAdmin
+        })
+    );
+}
+
+function logout() {
+    localStorage.removeItem('wms_session');
+    currentUser = null;
+    isAdmin = false;
+
+    document.getElementById('appContainer').classList.remove('active');
+    document.getElementById('loginPage').style.display = 'flex';
+
+    showToast('Logged out successfully');
+}
+
+        // ===== LOGIN HANDLER =====
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('loginId').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            showLoader();
+
+            // Check Admin
+            if (id === ADMIN_ID && password === ADMIN_PASSWORD) {
+                currentUser = { id: ADMIN_ID, name: 'Administrator' };
+                isAdmin = true;
+                saveSession();
+                await loadData();
+                saveSession();
+                initApp();
+                hideLoader();
+                return;
+            }
+
+            // Load data and check worker
+            await loadData();
+
+            const worker = DB.workers.find(w => w.id === id && w.password === password);
+            if (worker) {
+                currentUser = worker;
+                isAdmin = false;
+                saveSession();
+                initApp();
+            } else {
+                showToast('Invalid credentials!', 'error');
+            }
+
+            hideLoader();
+        });
+
+        // ===== APP INITIALIZATION =====
+        async function initApp() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appContainer').classList.add('active');
+
+            updateHeader();
+            buildSidebar();
+
+            if (isAdmin) {
+                showSection('dashboard');
+            } else {
+                showSection('worker-dashboard');
+            }
+
+            populateWorkerSelects();
+        }
+
+        function updateHeader() {
+            document.getElementById('headerName').textContent = currentUser.name || currentUser.id;
+            const photoEl = document.getElementById('headerPhoto');
+            if (currentUser.photo) {
+                photoEl.innerHTML = `<img src="${currentUser.photo}" alt="Photo">`;
+            } else {
+                photoEl.innerHTML = '<i class="fas fa-user"></i>';
+            }
+        }
+
+        function buildSidebar() {
+            const nav = document.getElementById('sidebarNav');
+            let html = '';
+
+            if (isAdmin) {
+                html = `
+                    <li class="nav-item">
+                        <a class="nav-link active" data-section="dashboard">
+                            <i class="fas fa-chart-line"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="add-worker">
+                            <i class="fas fa-user-plus"></i> Add Worker
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="all-workers">
+                            <i class="fas fa-users"></i> All Workers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="dehari-records">
+                            <i class="fas fa-clipboard-list"></i> Dehari Records
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="payments">
+                            <i class="fas fa-money-bill-wave"></i> Payments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="chutti">
+                            <i class="fas fa-calendar-times"></i> Chutti
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="reports">
+                            <i class="fas fa-file-pdf"></i> Reports
+                        </a>
+                    </li>
+                `;
+            } else {
+                html = `
+                    <li class="nav-item">
+                        <a class="nav-link active" data-section="worker-dashboard">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="my-records">
+                            <i class="fas fa-history"></i> My Records
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="worker-list">
+                            <i class="fas fa-address-book"></i> Worker List
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="reports">
+                            <i class="fas fa-file-pdf"></i> Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="profile">
+                            <i class="fas fa-user-circle"></i> Profile
+                        </a>
+                    </li>
+                `;
+            }
+
+            nav.innerHTML = html;
+
+            // Add click handlers
+            nav.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const section = this.dataset.section;
+                    showSection(section);
+                    nav.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('sidebar').classList.remove('active');
+                });
+            });
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            const sectionEl = document.getElementById('section-' + section);
+            if (sectionEl) {
+                sectionEl.classList.add('active');
+            }
+
+            // Render section-specific content
+            switch(section) {
+                case 'dashboard':
+                    renderAdminDashboard();
+                    break;
+                case 'worker-dashboard':
+                    renderWorkerDashboard();
+                    break;
+                case 'all-workers':
+                    renderWorkersGrid();
+                    break;
+                case 'dehari-records':
+                    renderDehariRecords();
+                    break;
+                case 'payments':
+                    renderPayments();
+                    break;
+                case 'chutti':
+                    renderChutti();
+                    break;
+                case 'reports':
+                    setupReports();
+                    break;
+                case 'my-records':
+                    renderMyRecords();
+                    break;
+                case 'worker-list':
+                    renderWorkerList();
+                    break;
+                case 'profile':
+                    renderProfile();
+                    break;
+            }
+        }
+
+        // ===== ADMIN DASHBOARD =====
+        function renderAdminDashboard() {
+            const today = getToday();
+
+            // Today's statistics
+            const todayDehari = DB.dehari.filter(d => d.date === today);
+            const todayPayments = DB.payments.filter(p => p.date === today);
+
+            // Workers who added dehari today = present
+            const presentWorkerIds = [...new Set(todayDehari.map(d => d.workerId))];
+            const presentCount = presentWorkerIds.length;
+
+            // Workers who haven't added dehari = absent (auto chutti)
+            const absentCount = DB.workers.length - presentCount;
+
+            const todayDehariCount = todayDehari.reduce((sum, d) => sum + (d.dehariValue || 0), 0);
+            const todayPaymentTotal = todayPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+            document.getElementById('adminStats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${presentCount}</h3>
+                        <p>Present Today</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${absentCount}</h3>
+                        <p>Absent Today (Chutti)</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${todayDehariCount.toFixed(1)}</h3>
+                        <p>Today's Dehari</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${formatCurrency(todayPaymentTotal)}</h3>
+                        <p>Today's Payment</p>
+                    </div>
+                </div>
+            `;
+
+            // Today's attendance table
+            const tbody = document.querySelector('#todayAttendanceTable tbody');
+            let rows = '';
+
+            DB.workers.forEach(worker => {
+                const dehari = todayDehari.find(d => d.workerId === worker.id);
+                if (dehari) {
+                    rows += `
+                        <tr class="today-highlight">
+                            <td><strong>${worker.name}</strong></td>
+                            <td><span class="badge badge-success">Present</span></td>
+                            <td>${dehari.startTime} - ${dehari.endTime}</td>
+                            <td>${dehari.dehariValue} (${formatCurrency(dehari.amount)})</td>
+                        </tr>
+                    `;
+                } else {
+                    rows += `
+                        <tr>
+                            <td><strong>${worker.name}</strong></td>
+                            <td><span class="badge badge-danger">Absent</span></td>
+                            <td>-</td>
+                            <td>0</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            if (!rows) {
+                rows = '<tr><td colspan="4" class="empty-state"><i class="fas fa-users"></i><p>No workers registered</p></td></tr>';
+            }
+
+            tbody.innerHTML = rows;
+        }
+
+        // ===== WORKER DASHBOARD =====
+        function renderWorkerDashboard() {
+            const today = getToday();
+            const worker = currentUser;
+
+            // Get worker's data
+            const workerDehari = DB.dehari.filter(d => d.workerId === worker.id);
+            const workerPayments = DB.payments.filter(p => p.workerId === worker.id);
+            const workerChutti = DB.chutti.filter(c => c.workerId === worker.id);
+
+            // Today's status
+            const todayDehari = workerDehari.find(d => d.date === today);
+
+            // This month's calculations
+            const thisMonth = today.substring(0, 7);
+            const monthDehari = workerDehari.filter(d => d.date.startsWith(thisMonth));
+            const totalDehariThisMonth = monthDehari.reduce((sum, d) => sum + (d.dehariValue || 0), 0);
+            const totalEarnedThisMonth = monthDehari.reduce((sum, d) => sum + (d.amount || 0), 0);
+            const totalPaidThisMonth = workerPayments.filter(p => p.date.startsWith(thisMonth)).reduce((sum, p) => sum + (p.amount || 0), 0);
+            const balance = totalEarnedThisMonth - totalPaidThisMonth;
+
+            // All time
+            const totalEarned = workerDehari.reduce((sum, d) => sum + (d.amount || 0), 0);
+            const totalPaid = workerPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+            const totalBalance = totalEarned - totalPaid;
+
+            document.getElementById('workerStats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon ${todayDehari ? 'green' : 'red'}">
+                        <i class="fas fa-${todayDehari ? 'check-circle' : 'times-circle'}"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${todayDehari ? todayDehari.dehariValue + ' Dehari' : 'Not Added'}</h3>
+                        <p>Today's Status</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${totalDehariThisMonth.toFixed(1)}</h3>
+                        <p>This Month's Dehari</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${formatCurrency(totalEarnedThisMonth)}</h3>
+                        <p>This Month's Earning</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon ${totalBalance >= 0 ? 'orange' : 'purple'}">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>${formatCurrency(totalBalance)}</h3>
+                        <p>Total Balance</p>
+                    </div>
+                </div>
+            `;
+
+            // Dehari form
+            const formContainer = document.getElementById('dehariFormContainer');
+
+            if (todayDehari) {
+                formContainer.innerHTML = `
+                    <div class="empty-state" style="padding: 20px;">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <h3 style="color: var(--success);">Today's Dehari Already Added!</h3>
+                        <p>Location: ${todayDehari.location}</p>
+                        <p>Time: ${todayDehari.startTime} - ${todayDehari.endTime}</p>
+                        <p>Dehari: <strong>${todayDehari.dehariValue}</strong></p>
+                        <p>Amount: <strong>${formatCurrency(todayDehari.amount)}</strong></p>
+                    </div>
+                `;
+            } else {
+                formContainer.innerHTML = `
+                    <form id="addDehariForm">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" value="${worker.name}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="dehariDate" value="${today}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="dehariLocation" placeholder="Work location" required>
+                        </div>
+                        <div class="time-grid">
+                            <div class="form-group">
+                                <label>Start Time (AM)</label>
+                                <input type="time" id="dehariStartTime" value="09:00" required>
+                            </div>
+                            <div class="form-group">
+                                <label>End Time (PM)</label>
+                                <input type="time" id="dehariEndTime" value="17:00" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Note (Optional)</label>
+                            <textarea id="dehariNote" rows="2" placeholder="Any additional notes"></textarea>
+                        </div>
+                        <div class="calc-display" id="dehariCalcDisplay">
+                            <div class="calc-row">
+                                <span>Hours:</span>
+                                <span id="calcHours">8</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Dehari:</span>
+                                <span id="calcDehari">1</span>
+                            </div>
+                            <div class="calc-row">
+                                <span>Amount (@ ${formatCurrency(currentUser.salary)}/day):</span>
+                                <span id="calcAmount">${formatCurrency(currentUser.salary)}</span>
+                            </div>
+                        </div>
+                        <br>
+                        <button type="submit" class="btn btn-success btn-block">
+                            <i class="fas fa-plus-circle"></i> Submit Dehari
+                        </button>
+                    </form>
+                `;
+
+                // Add time change listeners
+                document.getElementById('dehariStartTime').addEventListener('change', updateDehariCalc);
+                document.getElementById('dehariEndTime').addEventListener('change', updateDehariCalc);
+                document.getElementById('addDehariForm').addEventListener('submit', submitDehari);
+            }
+        }
+
+        function updateDehariCalc() {
+            const startTime = document.getElementById('dehariStartTime').value;
+            const endTime = document.getElementById('dehariEndTime').value;
+
+            if (startTime && endTime) {
+                const dehari = calculateDehari(startTime, endTime);
+                const salary = currentUser.salary;
+                const amount = calculateAmount(dehari, salary);
+
+                // Calculate hours
+                const [startH, startM] = startTime.split(':').map(Number);
+                const [endH, endM] = endTime.split(':').map(Number);
+                let startMinutes = startH * 60 + startM;
+                let endMinutes = endH * 60 + endM;
+                if (endMinutes <= startMinutes) endMinutes += 24 * 60;
+                const hours = (endMinutes - startMinutes) / 60;
+
+                document.getElementById('calcHours').textContent = hours.toFixed(1);
+                document.getElementById('calcDehari').textContent = dehari;
+                document.getElementById('calcAmount').textContent = formatCurrency(amount);
+            }
+        }
+
+        async function submitDehari(e) {
+            e.preventDefault();
+
+            const date = document.getElementById('dehariDate').value;
+            const location = document.getElementById('dehariLocation').value;
+            const startTime = document.getElementById('dehariStartTime').value;
+            const endTime = document.getElementById('dehariEndTime').value;
+            const note = document.getElementById('dehariNote').value;
+
+            // Check if already submitted for today
+            const existing = DB.dehari.find(d => d.workerId === currentUser.id && d.date === date);
+            if (existing) {
+                showToast('Dehari already added for today!', 'error');
+                return;
+            }
+
+            const dehariValue = calculateDehari(startTime, endTime);
+            const amount = calculateAmount(dehariValue, currentUser.salary || 500);
+
+            const newDehari = {
+                id: generateId(),
+                workerId: currentUser.id,
+                workerName: currentUser.name,
+                date: date,
+                startTime: startTime,
+                endTime: endTime,
+                location: location,
+                note: note,
+                dehariValue: dehariValue,
+                amount: amount,
+                locked: true
+            };
+
+            DB.dehari.push(newDehari);
+            await saveData();
+
+            showToast('Dehari submitted successfully!', 'success');
+            renderWorkerDashboard();
+        }
+
+        // ===== ADD WORKER =====
+        document.getElementById('addWorkerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('newWorkerId').value.trim();
+            const password = document.getElementById('newWorkerPassword').value;
+            const name = document.getElementById('newWorkerName').value.trim();
+            const joiningDate = document.getElementById('newWorkerJoiningDate').value;
+            const salary = parseInt(document.getElementById('newWorkerSalary').value);
+
+            // Check if ID exists
+            if (DB.workers.some(w => w.id === id)) {
+                showToast('Worker ID already exists!', 'error');
+                return;
+            }
+
+            const newWorker = {
+                id: id,
+                password: password,
+                name: name,
+                joiningDate: joiningDate,
+                salary: salary,
+                helpers: '',
+                photo: '',
+                language: 'en'
+            };
+
+            DB.workers.push(newWorker);
+            await saveData();
+
+            showToast('Worker added successfully!', 'success');
+            this.reset();
+            document.getElementById('newWorkerJoiningDate').value = getToday();
+            populateWorkerSelects();
+        });
+
+        // Set default joining date
+        document.getElementById('newWorkerJoiningDate').value = getToday();
+
+        // ===== WORKERS GRID =====
+        function renderWorkersGrid() {
+            const grid = document.getElementById('workersGrid');
+
+            if (DB.workers.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>No workers registered yet</p></div>';
+                return;
+            }
+
+            let html = '';
+            DB.workers.forEach(worker => {
+                html += `
+                    <div class="worker-card" onclick="showWorkerDetail('${worker.id}')">
+                        <div class="worker-avatar">
+                            ${worker.photo ? `<img src="${worker.photo}" alt="${worker.name}">` : '<i class="fas fa-user"></i>'}
+                        </div>
+                        <h3>${worker.name}</h3>
+                        <p>ID: ${worker.id}</p>
+                        <p>Salary: ${formatCurrency(worker.salary)}/day</p>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        // ===== WORKER DETAIL =====
+        function showWorkerDetail(workerId) {
+            const worker = DB.workers.find(w => w.id === workerId);
+            if (!worker) return;
+
+            showSection('worker-detail');
+
+            const workerDehari = DB.dehari.filter(d => d.workerId === workerId);
+            const workerPayments = DB.payments.filter(p => p.workerId === workerId);
+            const workerChutti = DB.chutti.filter(c => c.workerId === workerId);
+
+            const totalEarned = workerDehari.reduce((sum, d) => sum + (d.amount || 0), 0);
+            const totalPaid = workerPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+            const balance = totalEarned - totalPaid;
+
+            const content = document.getElementById('workerDetailContent');
+            content.innerHTML = `
+                <div class="worker-detail-header">
+                    <div class="worker-detail-avatar">
+                        ${worker.photo ? `<img src="${worker.photo}" alt="${worker.name}">` : '<i class="fas fa-user"></i>'}
+                    </div>
+                    <div class="worker-detail-info">
+                        <h2>${worker.name}</h2>
+                        <p><i class="fas fa-id-card"></i> ID: ${worker.id}</p>
+                        <p><i class="fas fa-calendar"></i> Joined: ${formatDate(worker.joiningDate)}</p>
+                        <p><i class="fas fa-rupee-sign"></i> Daily Salary: ${formatCurrency(worker.salary)}</p>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <button class="btn btn-primary btn-sm" onclick="editWorker('${worker.id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+                </div>
+
+                <div class="summary-row">
+                    <div class="summary-card">
+                        <h4>Total Dehari</h4>
+                        <div class="value">${workerDehari.reduce((s, d) => s + d.dehariValue, 0).toFixed(1)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Total Earned</h4>
+                        <div class="value success">${formatCurrency(totalEarned)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Total Paid</h4>
+                        <div class="value danger">${formatCurrency(totalPaid)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Balance</h4>
+                        <div class="value ${balance >= 0 ? 'warning' : 'danger'}">${formatCurrency(balance)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Total Chutti</h4>
+                        <div class="value">${workerChutti.length}</div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('detail-dehari', this)">Dehari</button>
+                    <button class="tab-btn" onclick="showTab('detail-payments', this)">Payments</button>
+                    <button class="tab-btn" onclick="showTab('detail-chutti', this)">Chutti</button>
+                </div>
+
+                <div class="tab-content active" id="detail-dehari">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Location</th>
+                                            <th>Time</th>
+                                            <th>Dehari</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${workerDehari.map(d => `
+                                            <tr>
+                                                <td>${formatDate(d.date)}</td>
+                                                <td>${d.location}</td>
+                                                <td>${d.startTime} - ${d.endTime}</td>
+                                                <td>${d.dehariValue}</td>
+                                                <td>${formatCurrency(d.amount)}</td>
+                                            </tr>
+                                        `).join('') || '<tr><td colspan="5">No records</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="detail-payments">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${workerPayments.map(p => `
+                                            <tr>
+                                                <td>${formatDate(p.date)}</td>
+                                                <td>${formatCurrency(p.amount)}</td>
+                                                <td>${p.notes || '-'}</td>
+                                            </tr>
+                                        `).join('') || '<tr><td colspan="3">No records</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="detail-chutti">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${workerChutti.map(c => `
+                                            <tr>
+                                                <td>${formatDate(c.date)}</td>
+                                                <td>${c.reason || '-'}</td>
+                                            </tr>
+                                        `).join('') || '<tr><td colspan="2">No records</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // ===== DEHARI RECORDS =====
+        function renderDehariRecords() {
+            const filterBar = document.getElementById('dehariFilterBar');
+            filterBar.innerHTML = `
+                <select id="dehariFilterWorker" onchange="filterDehariRecords()">
+                    <option value="">All Workers</option>
+                    ${DB.workers.map(w => `<option value="${w.id}">${w.name}</option>`).join('')}
+                </select>
+                <input type="month" id="dehariFilterMonth" onchange="filterDehariRecords()">
+            `;
+
+            filterDehariRecords();
+        }
+
+        function filterDehariRecords() {
+            const workerId = document.getElementById('dehariFilterWorker').value;
+            const month = document.getElementById('dehariFilterMonth').value;
+
+            let records = [...DB.dehari].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (workerId) {
+                records = records.filter(d => d.workerId === workerId);
+            }
+            if (month) {
+                records = records.filter(d => d.date.startsWith(month));
+            }
+
+            const tbody = document.querySelector('#dehariTable tbody');
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fas fa-clipboard"></i><p>No records found</p></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = records.map(d => {
+                const worker = DB.workers.find(w => w.id === d.workerId);
+                return `
+                    <tr>
+                        <td>${formatDate(d.date)}</td>
+                        <td>${worker ? worker.name : d.workerId}</td>
+                        <td>${d.location}</td>
+                        <td>${d.startTime} - ${d.endTime}</td>
+                        <td>${d.dehariValue}</td>
+                        <td>${formatCurrency(d.amount)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ===== PAYMENTS =====
+        function populateWorkerSelects() {
+            const selects = ['paymentWorkerId', 'chuttiWorkerId', 'paymentFilterWorker', 'chuttiFilterWorker', 'reportWorkerId'];
+            selects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    const firstOption = select.querySelector('option');
+                    select.innerHTML = '';
+                    if (firstOption) select.appendChild(firstOption);
+                    DB.workers.forEach(w => {
+                        const opt = document.createElement('option');
+                        opt.value = w.id;
+                        opt.textContent = w.name;
+                        select.appendChild(opt);
+                    });
+                }
+            });
+        }
+
+        document.getElementById('addPaymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const workerId = document.getElementById('paymentWorkerId').value;
+            const amount = parseInt(document.getElementById('paymentAmount').value);
+            const date = document.getElementById('paymentDate').value;
+            const notes = document.getElementById('paymentNotes').value;
+
+            const newPayment = {
+                id: generateId(),
+                workerId: workerId,
+                amount: amount,
+                date: date,
+                notes: notes
+            };
+
+            DB.payments.push(newPayment);
+            await saveData();
+
+            showToast('Payment added successfully!', 'success');
+            this.reset();
+            document.getElementById('paymentDate').value = getToday();
+            renderPayments();
+        });
+
+        document.getElementById('paymentDate').value = getToday();
+
+        function renderPayments() {
+            const workerId = document.getElementById('paymentFilterWorker').value;
+
+            let records = [...DB.payments].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (workerId) {
+                records = records.filter(p => p.workerId === workerId);
+            }
+
+            const tbody = document.querySelector('#paymentsTable tbody');
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">No payments found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = records.map(p => {
+                const worker = DB.workers.find(w => w.id === p.workerId);
+                return `
+                    <tr>
+                        <td>${formatDate(p.date)}</td>
+                        <td>${worker ? worker.name : p.workerId}</td>
+                        <td>${formatCurrency(p.amount)}</td>
+                        <td>${p.notes || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ===== CHUTTI =====
+        document.getElementById('addChuttiForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const workerId = document.getElementById('chuttiWorkerId').value;
+            const date = document.getElementById('chuttiDate').value;
+            const reason = document.getElementById('chuttiReason').value;
+
+            // Check if chutti already exists for this date
+            const existing = DB.chutti.find(c => c.workerId === workerId && c.date === date);
+            if (existing) {
+                showToast('Chutti already exists for this date!', 'error');
+                return;
+            }
+
+            // Check if dehari exists for this date
+            const hasDehari = DB.dehari.some(d => d.workerId === workerId && d.date === date);
+            if (hasDehari) {
+                showToast('Worker has dehari for this date!', 'error');
+                return;
+            }
+
+            const newChutti = {
+                id: generateId(),
+                workerId: workerId,
+                date: date,
+                reason: reason
+            };
+
+            DB.chutti.push(newChutti);
+            await saveData();
+
+            showToast('Chutti added successfully!', 'success');
+            this.reset();
+            renderChutti();
+        });
+
+        function renderChutti() {
+            const workerId = document.getElementById('chuttiFilterWorker').value;
+
+            let records = [...DB.chutti].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (workerId) {
+                records = records.filter(c => c.workerId === workerId);
+            }
+
+            const tbody = document.querySelector('#chuttiTable tbody');
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">No chutti records found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = records.map(c => {
+                const worker = DB.workers.find(w => w.id === c.workerId);
+                return `
+                    <tr>
+                        <td>${formatDate(c.date)}</td>
+                        <td>${worker ? worker.name : c.workerId}</td>
+                        <td>${c.reason || '-'}</td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm" onclick="editChutti('${c.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function editChutti(chuttiId) {
+            const chutti = DB.chutti.find(c => c.id === chuttiId);
+            if (!chutti) return;
+
+            document.getElementById('editChuttiId').value = chutti.id;
+            document.getElementById('editChuttiReason').value = chutti.reason || '';
+            openModal('editChuttiModal');
+        }
+
+        async function saveChuttiEdit() {
+            const id = document.getElementById('editChuttiId').value;
+            const reason = document.getElementById('editChuttiReason').value;
+
+            const chutti = DB.chutti.find(c => c.id === id);
+            if (chutti) {
+                chutti.reason = reason;
+                await saveData();
+                showToast('Chutti updated!', 'success');
+                closeModal('editChuttiModal');
+                renderChutti();
+            }
+        }
+
+        // ===== EDIT WORKER =====
+        function editWorker(workerId) {
+            const worker = DB.workers.find(w => w.id === workerId);
+            if (!worker) return;
+
+            document.getElementById('editWorkerIdField').value = worker.id;
+            document.getElementById('editWorkerName').value = worker.name;
+            document.getElementById('editWorkerSalary').value = worker.salary;
+            document.getElementById('editWorkerPassword').value = '';
+            openModal('editWorkerModal');
+        }
+
+        async function saveWorkerEdit() {
+            const id = document.getElementById('editWorkerIdField').value;
+            const name = document.getElementById('editWorkerName').value;
+            const salary = parseInt(document.getElementById('editWorkerSalary').value);
+            const password = document.getElementById('editWorkerPassword').value;
+
+            const worker = DB.workers.find(w => w.id === id);
+            if (worker) {
+                worker.name = name;
+                worker.salary = salary;
+                if (password) worker.password = password;
+                await saveData();
+                showToast('Worker updated!', 'success');
+                closeModal('editWorkerModal');
+                showWorkerDetail(id);
+                populateWorkerSelects();
+            }
+        }
+
+        async function deleteWorker() {
+            const id = document.getElementById('editWorkerIdField').value;
+
+            if (!confirm('Delete this worker and all related data?')) return;
+
+            DB.workers = DB.workers.filter(w => w.id !== id);
+            DB.dehari = DB.dehari.filter(d => d.workerId !== id);
+            DB.payments = DB.payments.filter(p => p.workerId !== id);
+            DB.chutti = DB.chutti.filter(c => c.workerId !== id);
+
+            await saveData();
+            showToast('Worker deleted!', 'success');
+            closeModal('editWorkerModal');
+            showSection('all-workers');
+            populateWorkerSelects();
+        }
+
+        // ===== REPORTS =====
+        function setupReports() {
+            document.getElementById('reportMonth').value = getToday().substring(0, 7);
+
+            if (isAdmin) {
+                document.getElementById('reportWorkerSelect').style.display = 'block';
+            } else {
+                document.getElementById('reportWorkerSelect').style.display = 'none';
+            }
+        }
+
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            generateReport();
+        });
+
+        function generateReport() {
+            const month = document.getElementById('reportMonth').value;
+            let workerId = isAdmin ? document.getElementById('reportWorkerId').value : currentUser.id;
+
+            let workers = workerId ? [DB.workers.find(w => w.id === workerId)] : DB.workers;
+            workers = workers.filter(Boolean);
+
+            let html = `
+                <h2 style="text-align: center; margin-bottom: 20px;">Monthly Report - ${month}</h2>
+            `;
+
+            workers.forEach(worker => {
+                const workerDehari = DB.dehari.filter(d => d.workerId === worker.id && d.date.startsWith(month));
+                const workerPayments = DB.payments.filter(p => p.workerId === worker.id && p.date.startsWith(month));
+                const workerChutti = DB.chutti.filter(c => c.workerId === worker.id && c.date.startsWith(month));
+
+                const totalDehari = workerDehari.reduce((s, d) => s + d.dehariValue, 0);
+                const totalEarned = workerDehari.reduce((s, d) => s + d.amount, 0);
+                const totalPaid = workerPayments.reduce((s, p) => s + p.amount, 0);
+                const balance = totalEarned - totalPaid;
+
+                html += `
+                    <div style="margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+                        <h3>${worker.name} (${worker.id})</h3>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0;">
+                            <div style="padding: 10px; background: #f0f9ff; border-radius: 6px;">
+                                <strong>Total Dehari:</strong><br>${totalDehari.toFixed(1)}
+                            </div>
+                            <div style="padding: 10px; background: #f0fdf4; border-radius: 6px;">
+                                <strong>Total Earned:</strong><br>${formatCurrency(totalEarned)}
+                            </div>
+                            <div style="padding: 10px; background: #fef2f2; border-radius: 6px;">
+                                <strong>Total Paid:</strong><br>${formatCurrency(totalPaid)}
+                            </div>
+                            <div style="padding: 10px; background: #fffbeb; border-radius: 6px;">
+                                <strong>Balance:</strong><br>${formatCurrency(balance)}
+                            </div>
+                        </div>
+
+                        <h4>Dehari Details</h4>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                            <thead>
+                                <tr style="background: #f8fafc;">
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Date</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Location</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Time</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Dehari</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${workerDehari.map(d => `
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;">${formatDate(d.date)}</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;">${d.location}</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;">${d.startTime} - ${d.endTime}</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;">${d.dehariValue}</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;">${formatCurrency(d.amount)}</td>
+                                    </tr>
+                                `).join('') || '<tr><td colspan="5" style="padding: 8px; border: 1px solid #ddd;">No records</td></tr>'}
+                            </tbody>
+                        </table>
+
+                        <h4>Payment Details</h4>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                            <thead>
+                                <tr style="background: #f8fafc;">
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Date</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Amount</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${workerPayments.map(p => `
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;">${formatDate(p.date)}</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;">${formatCurrency(p.amount)}</td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;">${p.notes || '-'}</td>
+                                    </tr>
+                                `).join('') || '<tr><td colspan="3" style="padding: 8px; border: 1px solid #ddd;">No records</td></tr>'}
+                            </tbody>
+                        </table>
+
+                        <h4>Chutti: ${workerChutti.length} days</h4>
+                    </div>
+                `;
+            });
+
+            document.getElementById('reportContent').innerHTML = html;
+            document.getElementById('reportPreview').style.display = 'block';
+        }
+
+        function downloadPDF() {
+            const content = document.getElementById('reportContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+            
+            
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        table { page-break-inside: avoid; }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+async function sharePDFWhatsApp() {
+    const { jsPDF } = window.jspdf;
+    const content = document.getElementById('reportContent');
+
+    const canvas = await html2canvas(content, { scale: 2 });
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+    const blob = pdf.output('blob');
+    const file = new File([blob], 'Report.pdf', { type: 'application/pdf' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+            files: [file],
+            title: 'Monthly Report',
+            text: 'Worker Monthly Report'
+        });
+    }
+}
+        // ===== MY RECORDS (Worker) =====
+        function renderMyRecords() {
+            const monthInput = document.getElementById('myRecordsMonth');
+            if (!monthInput.value) {
+                monthInput.value = getToday().substring(0, 7);
+            }
+
+            const month = monthInput.value;
+            const workerDehari = DB.dehari.filter(d => d.workerId === currentUser.id && d.date.startsWith(month));
+            const workerPayments = DB.payments.filter(p => p.workerId === currentUser.id && p.date.startsWith(month));
+
+            const totalDehari = workerDehari.reduce((s, d) => s + d.dehariValue, 0);
+            const totalEarned = workerDehari.reduce((s, d) => s + d.amount, 0);
+            const totalPaid = workerPayments.reduce((s, p) => s + p.amount, 0);
+            const balance = totalEarned - totalPaid;
+
+            document.getElementById('myRecordsSummary').innerHTML = `
+                <div class="summary-card">
+                    <h4>Total Dehari</h4>
+                    <div class="value">${totalDehari.toFixed(1)}</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Earned</h4>
+                    <div class="value success">${formatCurrency(totalEarned)}</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Paid</h4>
+                    <div class="value danger">${formatCurrency(totalPaid)}</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Balance</h4>
+                    <div class="value warning">${formatCurrency(balance)}</div>
+                </div>
+            `;
+
+            const tbody = document.querySelector('#myDehariTable tbody');
+            if (workerDehari.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">No records for this month</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = workerDehari.sort((a, b) => new Date(b.date) - new Date(a.date)).map(d => `
+                <tr>
+                    <td>${formatDate(d.date)}</td>
+                    <td>${d.location}</td>
+                    <td>${d.startTime} - ${d.endTime}</td>
+                    <td>${d.dehariValue}</td>
+                    <td>${formatCurrency(d.amount)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ===== WORKER LIST (Worker View) =====
+        function renderWorkerList() {
+            const grid = document.getElementById('workerListGrid');
+
+            if (DB.workers.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>No workers registered</p></div>';
+                return;
+            }
+
+            grid.innerHTML = DB.workers.map(w => `
+                <div class="worker-card" style="cursor: default;">
+                    <div class="worker-avatar">
+                        ${w.photo ? `<img src="${w.photo}" alt="${w.name}">` : '<i class="fas fa-user"></i>'}
+                    </div>
+                    <h3>${w.name}</h3>
+                    <p>ID: ${w.id}</p>
+                </div>
+            `).join('');
+        }
+
+        // ===== PROFILE =====
+        function renderProfile() {
+            const worker = isAdmin ? currentUser : DB.workers.find(w => w.id === currentUser.id);
+
+            document.getElementById('profileId').value = worker.id;
+            document.getElementById('profileName').value = worker.name || '';
+            document.getElementById('profileJoiningDate').value = worker.joiningDate || '';
+            document.getElementById('profileSalary').value = worker.salary || '';
+            document.getElementById('profileHelpers').value = worker.helpers || '';
+
+            const avatar = document.getElementById('profileAvatar');
+            if (worker.photo) {
+                avatar.innerHTML = `<img src="${worker.photo}" alt="Photo">`;
+            } else {
+                avatar.innerHTML = '<i class="fas fa-user"></i>';
+            }
+        }
+
+        function uploadPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result;
+                const avatar = document.getElementById('profileAvatar');
+                avatar.innerHTML = `<img src="${base64}" alt="Photo">`;
+
+                // Update in DB
+                if (!isAdmin) {
+                    const worker = DB.workers.find(w => w.id === currentUser.id);
+                    if (worker) {
+                        worker.photo = base64;
+                        currentUser.photo = base64;
+                    }
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (isAdmin) {
+                showToast('Admin profile updated!', 'success');
+                return;
+            }
+
+            const worker = DB.workers.find(w => w.id === currentUser.id);
+            if (worker) {
+                worker.name = document.getElementById('profileName').value;
+                worker.helpers = document.getElementById('profileHelpers').value;
+
+                currentUser.name = worker.name;
+
+                await saveData();
+                updateHeader();
+                showToast('Profile saved!', 'success');
+            }
+        });
+
+        // ===== MODALS =====
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // ===== SIDEBAR & DROPDOWN TOGGLES =====
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        document.getElementById('profileBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('dropdownMenu').classList.toggle('active');
+        });
+
+        document.addEventListener('click', function() {
+            document.getElementById('dropdownMenu').classList.remove('active');
+        });
+function autoAddChuttiForToday() {
+    const today = getToday();
+
+    DB.workers.forEach(worker => {
+        const hasDehari = DB.dehari.some(
+            d => d.workerId === worker.id && d.date === today
+        );
+        const hasChutti = DB.chutti.some(
+            c => c.workerId === worker.id && c.date === today
+        );
+
+        if (!hasDehari && !hasChutti) {
+            DB.chutti.push({
+                id: generateId(),
+                workerId: worker.id,
+                date: today,
+                reason: 'Auto chutti (No dehari added)',
+                auto: true
+            });
+        }
+    });
+}
+        // ===== INITIALIZATION =====
+        async function init() {
+            if (checkSession()) {
+                await loadData();
+
+                // Refresh current user data from DB
+                if (!isAdmin && currentUser) {
+                    const freshUser = DB.workers.find(w => w.id === currentUser.id);
+                    if (freshUser) {
+                        currentUser = freshUser;
+                        saveSession();
+                    } else {
+                        // Worker no longer exists
+                        logout();
+                        return;
+                    }
+                }
+
+                initApp();
+            } else {
+                hideLoader();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
