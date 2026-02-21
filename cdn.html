@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KV CDN Manager</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#09090b;
+  --s1:#111113;
+  --s2:#18181b;
+  --s3:#222226;
+  --border:#2e2e34;
+  --border2:#3f3f46;
+  --accent:#f97316;
+  --accent2:#fb923c;
+  --text:#e4e4e7;
+  --muted:#71717a;
+  --muted2:#52525b;
+  --success:#22c55e;
+  --error:#ef4444;
+  --warn:#facc15;
+  --blue:#60a5fa;
+  --r:8px;
+  --font:'Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'Cascadia Code','Fira Code','Courier New',monospace;
+}
+
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.6}
+body{display:flex;flex-direction:column;min-height:100vh}
+
+.header{
+  background:var(--s1);border-bottom:1px solid var(--border);
+  padding:0 24px;display:flex;align-items:center;justify-content:space-between;
+  height:58px;position:sticky;top:0;z-index:100;gap:12px;
+}
+.header-brand{display:flex;align-items:center;gap:11px;flex-shrink:0}
+.logo{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:18px;height:18px;fill:#fff}
+.brand-name{font-size:1rem;font-weight:700;letter-spacing:-0.2px;white-space:nowrap}
+.brand-sub{font-size:0.7rem;color:var(--muted);letter-spacing:0.2px}
+.site-count{background:var(--s3);border:1px solid var(--border);border-radius:20px;font-size:0.72rem;padding:3px 10px;color:var(--muted);font-weight:600;white-space:nowrap}
+
+.layout{display:flex;flex:1;min-height:0}
+
+.sidebar{
+  width:230px;flex-shrink:0;background:var(--s1);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;
+}
+.sidebar-top{padding:14px 12px 10px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.sidebar-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);padding:0 2px}
+
+.search-wrap{position:relative}
+.search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:13px;height:13px;stroke:var(--muted2);stroke-width:2;fill:none;pointer-events:none}
+.search-input{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem;padding:7px 9px 7px 28px;outline:none;font-family:var(--font);transition:border-color 0.15s}
+.search-input:focus{border-color:var(--border2)}
+.search-input::placeholder{color:var(--muted2)}
+
+.btn-new{width:100%;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:var(--font);font-weight:600;font-size:0.8rem;padding:8px 12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s,transform 0.1s}
+.btn-new:hover{background:var(--accent2)}
+.btn-new:active{transform:scale(0.97)}
+
+.site-list{flex:1;overflow-y:auto;padding:6px 8px;display:flex;flex-direction:column;gap:2px}
+.site-list::-webkit-scrollbar{width:4px}
+.site-list::-webkit-scrollbar-track{background:transparent}
+.site-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+.site-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;transition:background 0.12s;border:1px solid transparent;user-select:none}
+.site-item:hover{background:var(--s3)}
+.site-item.active{background:rgba(249,115,22,0.12);border-color:rgba(249,115,22,0.3)}
+.site-dot{width:7px;height:7px;border-radius:50%;background:var(--muted2);flex-shrink:0;transition:background 0.15s}
+.site-item.active .site-dot{background:var(--accent)}
+.site-name{font-size:0.82rem;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.site-item.active .site-name{color:var(--accent2)}
+.empty-list{padding:24px 12px;text-align:center;color:var(--muted);font-size:0.8rem;line-height:1.7}
+
+.main{flex:1;overflow-y:auto;padding:28px 28px 60px;display:flex;flex-direction:column;gap:20px}
+.main::-webkit-scrollbar{width:5px}
+.main::-webkit-scrollbar-track{background:transparent}
+.main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px;text-align:center}
+.welcome-icon{width:64px;height:64px;background:var(--s3);border:1px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center}
+.welcome-icon svg{width:30px;height:30px;stroke:var(--muted);stroke-width:1.5;fill:none}
+.welcome h2{font-size:1.2rem;font-weight:600}
+.welcome p{font-size:0.85rem;color:var(--muted);max-width:320px;line-height:1.7}
+
+.form-section{display:flex;flex-direction:column;gap:20px;max-width:900px;width:100%}
+.section-title{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:8px}
+
+.name-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:6px;flex:1;min-width:180px}
+label{font-size:0.78rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}
+.required{color:var(--accent);font-size:0.9em}
+
+input[type=text]{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:0.9rem;font-family:var(--mono);padding:10px 14px;outline:none;transition:border-color 0.15s,background 0.15s;width:100%}
+input[type=text]:focus{border-color:var(--accent);background:var(--s3)}
+input[type=text]::placeholder{color:var(--muted2)}
+input[type=text][readonly]{opacity:0.55;cursor:not-allowed}
+
+.card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s3);border-bottom:1px solid var(--border)}
+.card-title{display:flex;align-items:center;gap:8px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted)}
+.lang-badge{font-size:0.68rem;padding:2px 7px;border-radius:12px;font-weight:700;letter-spacing:0.3px}
+.badge-js{background:#431407;color:#fb923c;border:1px solid #7c2d12}
+.badge-css{background:#0c1a3a;color:#60a5fa;border:1px solid #1e3a6e}
+.counter{font-size:0.72rem;color:var(--muted);font-family:var(--mono)}
+
+textarea{width:100%;min-height:200px;background:var(--s2);color:var(--text);border:none;outline:none;font-family:var(--mono);font-size:0.82rem;line-height:1.7;padding:14px;resize:vertical;tab-size:2;transition:background 0.15s}
+textarea::placeholder{color:#3f3f46}
+textarea:focus{background:#1c1c21}
+
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.btn{cursor:pointer;border:none;outline:none;font-family:var(--font);font-weight:600;border-radius:var(--r);transition:background 0.15s,transform 0.1s,opacity 0.15s;display:flex;align-items:center;gap:7px;font-size:0.85rem;padding:10px 22px;user-select:none;white-space:nowrap}
+.btn:active{transform:scale(0.97)}
+.btn:disabled{opacity:0.45;cursor:not-allowed;transform:none}
+.btn-save{background:var(--accent);color:#fff}
+.btn-save:hover:not(:disabled){background:var(--accent2)}
+.btn-delete{background:rgba(239,68,68,0.12);color:var(--error);border:1px solid rgba(239,68,68,0.3)}
+.btn-delete:hover:not(:disabled){background:rgba(239,68,68,0.2)}
+.btn-copy{background:var(--s3);color:var(--text);border:1px solid var(--border)}
+.btn-copy:hover:not(:disabled){background:#28282e;border-color:var(--border2)}
+.btn-sm{padding:8px 18px;font-size:0.82rem}
+
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,0.25);border-top-color:#fff;border-radius:50%;animation:spin 0.65s linear infinite;flex-shrink:0;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.output-value{flex:1;padding:14px;font-family:var(--mono);font-size:0.82rem;color:#86efac;line-height:1.65;word-break:break-all;background:transparent}
+.output-inner{display:flex;align-items:stretch;min-height:52px}
+.meta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:var(--s3);border-top:1px solid var(--border)}
+
+.id-pill{display:inline-flex;align-items:center;gap:6px;background:#14532d;color:#86efac;border:1px solid #166534;border-radius:20px;font-family:var(--mono);font-size:0.72rem;padding:3px 10px;font-weight:600}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
+
+.error-bar{display:none;background:#1c0a0a;border:1px solid #7f1d1d;border-radius:var(--r);padding:12px 14px;color:var(--error);font-size:0.82rem;align-items:flex-start;gap:9px}
+.error-bar svg{flex-shrink:0;margin-top:1px}
+.error-bar.show{display:flex}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);border-radius:40px;padding:10px 20px;font-size:0.82rem;font-weight:600;display:flex;align-items:center;gap:8px;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;z-index:9999;white-space:nowrap;border:1px solid transparent}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:#0f2318;color:var(--success);border-color:#166534}
+.toast.info{background:#0c1a3a;color:var(--blue);border-color:#1e3a6e}
+.toast.danger{background:#1c0a0a;color:var(--error);border-color:#7f1d1d}
+
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:28px 28px 22px;max-width:380px;width:100%;display:flex;flex-direction:column;gap:14px;animation:fadeUp 0.18s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.modal-icon{width:44px;height:44px;border-radius:10px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);display:flex;align-items:center;justify-content:center}
+.modal-icon svg{width:22px;height:22px;stroke:var(--error);fill:none;stroke-width:2}
+.modal h3{font-size:1rem;font-weight:700}
+.modal p{font-size:0.85rem;color:var(--muted);line-height:1.7}
+.modal p strong{color:var(--text)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+
+.sidebar-toggle{display:none;background:var(--s3);border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:6px 8px;align-items:center;justify-content:center;color:var(--text)}
+.sidebar-toggle svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50}
+
+@media(max-width:720px){
+  .sidebar{position:fixed;left:-240px;top:0;bottom:0;z-index:60;width:230px;transition:left 0.25s ease}
+  .sidebar.open{left:0;box-shadow:4px 0 24px rgba(0,0,0,0.5)}
+  .sidebar-overlay.show{display:block}
+  .sidebar-toggle{display:flex}
+  .main{padding:20px 16px 60px}
+  .name-row{flex-direction:column;gap:10px}
+  .field{min-width:100%}
+  .btn{padding:10px 16px;font-size:0.82rem}
+}
+@media(max-width:400px){
+  .brand-sub{display:none}
+  .btn{padding:9px 14px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Sites">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="header-brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">KV CDN Manager</div>
+        <div class="brand-sub">Cloudflare Workers</div>
+      </div>
+    </div>
+  </div>
+  <div class="site-count" id="siteCount">0 sites</div>
+</header>
+
+<div class="layout">
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-label">Sites</div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" type="text" id="searchInput" placeholder="Search sites…" oninput="filterSites(this.value)" autocomplete="off">
+      </div>
+      <button class="btn-new" onclick="newSite()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Site
+      </button>
+    </div>
+    <div class="site-list" id="siteList">
+      <div class="empty-list">No sites yet.<br>Click <strong>New Site</strong> to begin.</div>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+
+    <div class="welcome" id="welcomeState">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
+      <h2>No Site Selected</h2>
+      <p>Select a site from the sidebar or create a new one to start managing your JS &amp; CSS bundles.</p>
+      <button class="btn btn-save" onclick="newSite()" style="margin-top:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create First Site
+      </button>
+    </div>
+
+    <div class="form-section" id="formState" style="display:none">
+
+      <div class="name-row">
+        <div class="field">
+          <label for="siteName"><span class="required">*</span> Site Name / ID</label>
+          <input type="text" id="siteName" placeholder="e.g. moviehub" maxlength="80" autocomplete="off" spellcheck="false" oninput="onNameInput()">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:0">
+          <button class="btn btn-save" id="saveBtn" onclick="saveSite()" title="Ctrl+S">
+            <div class="spinner" id="spinner"></div>
+            <svg id="saveIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span id="saveBtnText">Save</span>
+          </button>
+          <button class="btn btn-delete" id="deleteBtn" onclick="confirmDelete()" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <div class="error-bar" id="errorBar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="errorMsg"></span>
+      </div>
+
+      <div>
+        <div class="section-title">Code Bundles</div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><span class="lang-badge badge-js">JS</span>JavaScript</div>
+            <span class="counter" id="jsCounter">0 chars</span>
+          </div>
+          <textarea id="jsInput" placeholder="// Paste your JavaScript here…" spellcheck="false" autocomplete="off" oninput="updateCounter('js')"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title"><span class="lang-badge badge-css">CSS</span>CSS</div>
+            <span class="counter" id="cssCounter">0 chars</span>
+          </div>
+          <textarea id="cssInput" placeholder="/* Paste your CSS here… */" spellcheck="false" autocomplete="off" oninput="updateCounter('css')"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Loader Output</div>
+        <div class="card" id="outputCard" style="display:none">
+          <div class="output-inner">
+            <div class="output-value" id="loaderOutput"></div>
+          </div>
+          <div class="meta-row">
+            <div class="id-pill">
+              <div class="live-dot"></div>
+              <span id="loaderIdDisplay"></span>
+            </div>
+            <div style="margin-left:auto">
+              <button class="btn btn-copy btn-sm" onclick="copyLoader()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy Loader
+              </button>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:8px;padding:0 2px" id="outputHint">Save your site to generate the loader script.</div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+    </div>
+    <h3>Delete Site</h3>
+    <p>Are you sure you want to delete <strong id="deleteNameDisplay"></strong>? This will remove the KV entry and the loader will stop working.</p>
+    <div class="modal-actions">
+      <button class="btn btn-copy btn-sm" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-delete btn-sm" id="confirmDeleteBtn" onclick="deleteSite()">
+        <span id="deleteSpinner" class="spinner" style="border-top-color:var(--error);border-color:rgba(239,68,68,0.25)"></span>
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const WORKER = 'https://dontremove.kumarthakurabhishek41.workers.dev';
+const SAVE_URL   = WORKER + '/save';
+const DELETE_URL = WORKER + '/delete';
+
+let sites = {};
+let activeSite = null;
+let toastTimer = null;
+
+function init() {
+  try { sites = JSON.parse(localStorage.getItem('kv_cdn_sites') || '{}'); } catch(e) { sites = {}; }
+  renderSiteList();
+}
+
+function persist() {
+  localStorage.setItem('kv_cdn_sites', JSON.stringify(sites));
+}
+
+// SIDEBAR
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  const open = sb.classList.toggle('open');
+  ov.classList.toggle('show', open);
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+// RENDER LIST
+function renderSiteList(filter) {
+  const list = document.getElementById('siteList');
+  const allNames = Object.keys(sites).sort();
+  const names = filter ? allNames.filter(n => n.toLowerCase().includes(filter.toLowerCase())) : allNames;
+
+  document.getElementById('siteCount').textContent = allNames.length + ' site' + (allNames.length !== 1 ? 's' : '');
+
+  if (names.length === 0) {
+    list.innerHTML = '<div class="empty-list">' + (allNames.length === 0 ? 'No sites yet.<br>Click <strong>New Site</strong> to begin.' : 'No sites match.') + '</div>';
+    return;
+  }
+
+  list.innerHTML = names.map(n => {
+    const active = activeSite === n ? ' active' : '';
+    const esc = n.replace(/"/g,'&quot;').replace(/</g,'&lt;');
+    return `<div class="site-item${active}" onclick="selectSite('${esc}')"><div class="site-dot"></div><div class="site-name" title="${esc}">${esc}</div></div>`;
+  }).join('');
+}
+
+function filterSites(val) { renderSiteList(val.trim()); }
+
+// SELECT / NEW
+function selectSite(name) {
+  activeSite = name;
+  const s = sites[name] || {};
+  document.getElementById('siteName').value = name;
+  document.getElementById('siteName').readOnly = true;
+  document.getElementById('jsInput').value = s.js || '';
+  document.getElementById('cssInput').value = s.css || '';
+  updateCounter('js'); updateCounter('css');
+  hideError();
+  s.loader ? showOutput(name, s.loader) : hideOutput();
+  document.getElementById('saveBtnText').textContent = 'Update';
+  document.getElementById('deleteBtn').style.display = 'flex';
+  showForm(); renderSiteList(); closeSidebar();
+}
+
+function newSite() {
+  activeSite = null;
+  document.getElementById('siteName').value = '';
+  document.getElementById('siteName').readOnly = false;
+  document.getElementById('jsInput').value = '';
+  document.getElementById('cssInput').value = '';
+  updateCounter('js'); updateCounter('css');
+  hideOutput(); hideError();
+  document.getElementById('saveBtnText').textContent = 'Save';
+  document.getElementById('deleteBtn').style.display = 'none';
+  showForm(); renderSiteList(); closeSidebar();
+  setTimeout(() => document.getElementById('siteName').focus(), 60);
+}
+
+function onNameInput() {
+  const el = document.getElementById('siteName');
+  el.value = el.value.replace(/[^a-zA-Z0-9_\-]/g,'').toLowerCase();
+}
+
+function showForm() {
+  document.getElementById('welcomeState').style.display = 'none';
+  document.getElementById('formState').style.display = 'flex';
+}
+
+function updateCounter(type) {
+  const len = document.getElementById(type+'Input').value.length;
+  document.getElementById(type+'Counter').textContent = len.toLocaleString()+' char'+(len!==1?'s':'');
+}
+
+// SAVE
+async function saveSite() {
+  const name = document.getElementById('siteName').value.trim();
+  if (!name) { showError('Site name is required.'); return; }
+  if (!/^[a-zA-Z0-9_\-]+$/.test(name)) { showError('Only letters, numbers, hyphens, underscores allowed.'); return; }
+  const js = document.getElementById('jsInput').value;
+  const css = document.getElementById('cssInput').value;
+  if (!js.trim() && !css.trim()) { showError('Enter at least some JavaScript or CSS.'); return; }
+
+  hideError(); setLoading(true);
+
+  try {
+    const res = await fetch(SAVE_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,js,css})
+    });
+    const data = await res.json().catch(()=>null);
+    if (!res.ok || !data) throw new Error(data?.error || 'Server error '+res.status);
+    if (!data.success || !data.loader) throw new Error(data.error || 'Unexpected response.');
+
+    sites[name] = {js,css,loader:data.loader};
+    persist();
+    activeSite = name;
+    document.getElementById('siteName').readOnly = true;
+    document.getElementById('saveBtnText').textContent = 'Update';
+    document.getElementById('deleteBtn').style.display = 'flex';
+    showOutput(name, data.loader);
+    renderSiteList();
+    toast('Site saved successfully!','success');
+  } catch(err) {
+    showError(err.message || 'Unexpected error occurred.');
+    console.error('[KV CDN]', err);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setLoading(on) {
+  document.getElementById('saveBtn').disabled = on;
+  document.getElementById('spinner').style.display = on ? 'block' : 'none';
+  document.getElementById('saveIcon').style.display = on ? 'none' : 'block';
+  document.getElementById('saveBtnText').textContent = on ? 'Saving…' : (activeSite ? 'Update' : 'Save');
+}
+
+// DELETE
+function confirmDelete() {
+  if (!activeSite) return;
+  document.getElementById('deleteNameDisplay').textContent = '"'+activeSite+'"';
+  document.getElementById('deleteModal').classList.add('show');
+}
+function closeModal() { document.getElementById('deleteModal').classList.remove('show'); }
+
+async function deleteSite() {
+  const name = activeSite;
+  if (!name) return;
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true;
+  document.getElementById('deleteSpinner').style.display = 'block';
+
+  try {
+    const res = await fetch(DELETE_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name})
+    });
+    const data = await res.json().catch(()=>null);
+    if (!res.ok) throw new Error(data?.error || 'Server error '+res.status);
+
+    delete sites[name];
+    persist();
+    activeSite = null;
+    closeModal();
+    const remaining = Object.keys(sites);
+    if (remaining.length > 0) { selectSite(remaining.sort()[0]); }
+    else {
+      renderSiteList();
+      document.getElementById('welcomeState').style.display = 'flex';
+      document.getElementById('formState').style.display = 'none';
+    }
+    toast('Site deleted.','danger');
+  } catch(err) {
+    closeModal();
+    showError(err.message || 'Delete failed.');
+    console.error('[KV CDN]', err);
+  } finally {
+    btn.disabled = false;
+    document.getElementById('deleteSpinner').style.display = 'none';
+  }
+}
+
+// OUTPUT
+function showOutput(name, loader) {
+  document.getElementById('outputCard').style.display = 'block';
+  document.getElementById('loaderOutput').textContent = loader;
+  document.getElementById('loaderIdDisplay').textContent = name;
+  document.getElementById('outputHint').style.display = 'none';
+}
+function hideOutput() {
+  document.getElementById('outputCard').style.display = 'none';
+  document.getElementById('outputHint').style.display = 'block';
+}
+
+// COPY
+function copyLoader() {
+  const text = document.getElementById('loaderOutput').textContent;
+  if (!text) return;
+  const done = () => toast('Loader copied!','info');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(()=>legacyCopy(text,done));
+  } else { legacyCopy(text,done); }
+}
+function legacyCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText='position:fixed;opacity:0;pointer-events:none;top:0;left:0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');cb();}catch(e){}
+  document.body.removeChild(ta);
+}
+
+// ERROR
+function showError(msg) {
+  const bar = document.getElementById('errorBar');
+  document.getElementById('errorMsg').textContent = msg;
+  bar.classList.add('show');
+  bar.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function hideError() { document.getElementById('errorBar').classList.remove('show'); }
+
+// TOAST
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  const icons = {
+    success:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+    info:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    danger:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>'
+  };
+  el.className='toast '+type;
+  el.innerHTML=(icons[type]||'')+msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+// KEYBOARD
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey)&&e.key==='s') {
+    e.preventDefault();
+    if (!document.getElementById('saveBtn').disabled && document.getElementById('formState').style.display!=='none') saveSite();
+  }
+  if (e.key==='Escape'){closeModal();closeSidebar();}
+});
+
+document.getElementById('deleteModal').addEventListener('click', function(e){if(e.target===this)closeModal();});
+
+init();
+</script>
+</body>
+</html>
