@@ -1,597 +1,612 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>चंदन जी टीम - श्रमिक प्रबंधन ऐप</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>चंदन जी टीम – लेबर मैनेजमेंट सिस्टम</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0b0b0b;
+    --surface:  #141414;
+    --surface2: #1a1a1a;
+    --border:   #252525;
+    --text:     #e2e2e2;
+    --muted:    #777;
+    --blue:     #3b9eff;
+    --blue-bg:  rgba(59,158,255,0.10);
+    --blue-bd:  rgba(59,158,255,0.28);
+    --white:    #ffffff;
+    --radius:   8px;
+    --trans:    0.6s cubic-bezier(0.22,1,0.36,1);
+  }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f8f9fa;
-        }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; font-size:16px; }
 
-        /* Header */
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    line-height: 1.7;
+    padding-bottom: 74px;
+    -webkit-font-smoothing: antialiased;
+  }
 
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius:10px; }
 
-        .logo {
-            width: 50px;
-            height: 50px;
-            background: white;
-            color: #667eea;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+  /* ── NAV ── */
+  nav {
+    position: sticky; top:0; z-index:200;
+    background: rgba(11,11,11,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items:center; justify-content:space-between;
+    padding: 0 28px; height:58px;
+  }
 
-        .app-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
+  .nav-logo {
+    font-weight:800; font-size:1.05rem;
+    color: var(--blue); letter-spacing:1.5px;
+    text-transform:uppercase; text-decoration:none;
+  }
 
-        /* Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+  .nav-links {
+    display:flex; gap:6px; list-style:none;
+  }
 
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 80px 20px;
-            text-align: center;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out forwards;
-        }
+  .nav-links a {
+    color: var(--muted); text-decoration:none;
+    font-size:0.78rem; font-weight:600; letter-spacing:.8px;
+    text-transform:uppercase; padding:6px 12px;
+    border-radius:4px; transition:color .2s,background .2s;
+  }
 
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
+  .nav-links a:hover { color:var(--blue); background:var(--blue-bg); }
 
-        .hero p {
-            font-size: 1.3rem;
-            margin-bottom: 40px;
-            opacity: 0.95;
-        }
+  /* ── FADE-IN ANIMATION ── */
+  .reveal {
+    opacity:0;
+    transform: translateY(28px);
+    transition: opacity var(--trans), transform var(--trans);
+  }
 
-        .btn-primary {
-            background: white;
-            color: #667eea;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            text-decoration: none;
-            display: inline-block;
-        }
+  .reveal.visible {
+    opacity:1;
+    transform: translateY(0);
+  }
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 25px rgba(0,0,0,0.3);
-        }
+  .reveal-d1 { transition-delay:.08s; }
+  .reveal-d2 { transition-delay:.16s; }
+  .reveal-d3 { transition-delay:.24s; }
+  .reveal-d4 { transition-delay:.32s; }
+  .reveal-d5 { transition-delay:.40s; }
 
-        /* Features Section */
-        .features {
-            padding: 80px 20px;
-            background: white;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out 0.2s forwards;
-        }
+  /* ── SHARED LAYOUT ── */
+  .section-wrap {
+    max-width:880px; margin:0 auto; padding:72px 24px;
+  }
 
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 60px;
-            color: #2d3748;
-        }
+  .section-label {
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:0.72rem; font-weight:700; letter-spacing:2px;
+    text-transform:uppercase; color:var(--blue);
+    background:var(--blue-bg); border:1px solid var(--blue-bd);
+    padding:4px 12px; border-radius:20px; margin-bottom:16px;
+  }
 
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
+  .section-heading {
+    font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+    font-weight:800; color:var(--white);
+    line-height:1.2; margin-bottom:14px;
+  }
 
-        .feature-card {
-            background: #f7fafc;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            opacity: 0;
-            animation: slideUp 0.6s ease-out forwards;
-        }
+  .section-bar {
+    width:36px; height:2px;
+    background:var(--blue); border-radius:2px;
+    margin-bottom:40px;
+  }
 
-        .feature-card:nth-child(1) { animation-delay: 0.3s; }
-        .feature-card:nth-child(2) { animation-delay: 0.4s; }
-        .feature-card:nth-child(3) { animation-delay: 0.5s; }
-        .feature-card:nth-child(4) { animation-delay: 0.6s; }
+  /* ── HERO ── */
+  #hero {
+    min-height: calc(100vh - 58px);
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:60px 24px;
+    border-bottom:1px solid var(--border);
+    position:relative; overflow:hidden;
+  }
 
-        .feature-card:hover {
-            transform: translateY(-10px);
-            border-color: #667eea;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
-        }
+  #hero::before {
+    content:'';
+    position:absolute; inset:0;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(59,158,255,0.06) 0%, transparent 70%);
+    pointer-events:none;
+  }
 
-        .feature-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 2rem;
-            font-weight: bold;
-        }
+  .hero-inner { max-width:680px; position:relative; z-index:1; }
 
-        .feature-card h3 {
-            font-size: 1.4rem;
-            margin-bottom: 15px;
-            color: #2d3748;
-        }
+  .hero-badge {
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:0.72rem; font-weight:700; letter-spacing:2px;
+    text-transform:uppercase; color:var(--blue);
+    background:var(--blue-bg); border:1px solid var(--blue-bd);
+    padding:5px 14px; border-radius:20px; margin-bottom:28px;
+  }
 
-        .feature-card p {
-            color: #4a5568;
-            line-height: 1.7;
-        }
+  .hero-title {
+    font-size: clamp(2.6rem, 8vw, 4.8rem);
+    font-weight:800; color:var(--white);
+    line-height:1.05; letter-spacing:1px; margin-bottom:12px;
+  }
 
-        /* App Preview Section */
-        .app-preview {
-            padding: 80px 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out 0.4s forwards;
-        }
+  .hero-title em { color:var(--blue); font-style:normal; }
 
-        .preview-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
+  .hero-sub {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    color:var(--muted); font-weight:500;
+    letter-spacing:1px; margin-bottom:28px;
+  }
 
-        .screenshot {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            aspect-ratio: 9/16;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #cbd5e0;
-            font-size: 3rem;
-            border: 3px solid #e2e8f0;
-        }
+  .hero-desc {
+    font-size:1rem; color:#999;
+    max-width:520px; margin:0 auto 40px;
+    line-height:1.85;
+  }
 
-        /* About Section */
-        .about {
-            padding: 80px 20px;
-            background: white;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out 0.6s forwards;
-        }
+  .btn-primary {
+    display:inline-flex; align-items:center; gap:10px;
+    background:var(--blue); color:#000;
+    font-family:inherit; font-weight:700;
+    font-size:.95rem; letter-spacing:.5px;
+    padding:14px 32px; border-radius:var(--radius);
+    text-decoration:none; border:none; cursor:pointer;
+    transition:background .2s, transform .15s, box-shadow .2s;
+    box-shadow:0 0 0 0 rgba(59,158,255,0);
+  }
 
-        .about-content {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #4a5568;
-        }
+  .btn-primary:hover {
+    background:#5db8ff;
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(59,158,255,0.22);
+  }
 
-        /* Disclaimer Section */
-        .disclaimer {
-            padding: 60px 20px;
-            background: #fff3cd;
-            border-top: 4px solid #ffc107;
-            border-bottom: 4px solid #ffc107;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out 0.8s forwards;
-        }
+  .btn-primary:active { transform:translateY(0); }
 
-        .disclaimer-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+  /* ── FEATURES ── */
+  #features { border-bottom:1px solid var(--border); }
 
-        .disclaimer h2 {
-            color: #856404;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+  .features-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px,1fr));
+    gap:14px;
+  }
 
-        .disclaimer ul {
-            list-style: none;
-            padding: 0;
-        }
+  .feat-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px 20px;
+    display:flex; align-items:flex-start; gap:16px;
+    transition:border-color .25s, transform .25s;
+  }
 
-        .disclaimer li {
-            padding: 10px 0;
-            color: #856404;
-            font-weight: 500;
-        }
+  .feat-card:hover {
+    border-color:var(--blue-bd);
+    transform:translateY(-2px);
+  }
 
-        .disclaimer li:before {
-            content: "⚠️";
-            margin-right: 10px;
-        }
+  .feat-icon {
+    width:44px; height:44px; flex-shrink:0;
+    background:var(--blue-bg); border:1px solid var(--blue-bd);
+    border-radius:var(--radius);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--blue); font-size:1rem;
+  }
 
-        /* Privacy Section */
-        .privacy {
-            padding: 80px 20px;
-            background: #e8f5e9;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out 1s forwards;
-        }
+  .feat-text {
+    padding-top:11px;
+    font-size:.93rem; color:var(--text);
+    line-height:1.55;
+  }
 
-        .privacy h2 {
-            color: #2e7d32;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+  /* ── HOW IT WORKS ── */
+  #how { background:var(--surface); border-bottom:1px solid var(--border); }
 
-        .privacy-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+  .steps {
+    display:flex; flex-direction:column; gap:0;
+    position:relative;
+  }
 
-        .privacy ul {
-            list-style: none;
-            padding: 0;
-        }
+  .steps::before {
+    content:'';
+    position:absolute; left:19px; top:24px; bottom:24px;
+    width:1px; background:var(--border);
+    z-index:0;
+  }
 
-        .privacy li {
-            padding: 15px;
-            background: white;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            color: #2d3748;
-            border-left: 4px solid #4caf50;
-        }
+  .step {
+    display:flex; align-items:flex-start; gap:20px;
+    padding:18px 0;
+    position:relative; z-index:1;
+  }
 
-        .privacy li:before {
-            content: "🔒";
-            margin-right: 10px;
-        }
+  .step-num {
+    width:40px; height:40px; flex-shrink:0;
+    background:var(--bg); border:1px solid var(--blue-bd);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--blue); font-size:.78rem; font-weight:800;
+    letter-spacing:.5px;
+  }
 
-        /* Download Section */
-        .download {
-            padding: 80px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            text-align: center;
-            color: white;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out 1.2s forwards;
-        }
+  .step-body { padding-top:8px; }
 
-        .download h2 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-        }
+  .step-body strong {
+    display:block; color:var(--white);
+    font-size:.92rem; font-weight:700; margin-bottom:2px;
+  }
 
-        .btn-download {
-            background: white;
-            color: #667eea;
-            padding: 20px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 30px rgba(0,0,0,0.3);
-        }
+  .step-body span {
+    font-size:.87rem; color:var(--muted);
+  }
 
-        .btn-download:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-        }
+  /* ── TEAM SYSTEM ── */
+  #team { border-bottom:1px solid var(--border); }
 
-        /* Footer */
-        footer {
-            background: #2d3748;
-            color: white;
-            text-align: center;
-            padding: 30px 20px;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out 1.4s forwards;
-        }
+  .team-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap:14px;
+  }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
+  .team-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:28px 22px;
+    text-align:center;
+    transition:border-color .25s;
+  }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+  .team-card:hover { border-color:var(--blue-bd); }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
+  .team-card i {
+    font-size:1.8rem; color:var(--blue);
+    margin-bottom:14px; display:block;
+  }
 
-            .hero p {
-                font-size: 1.1rem;
-            }
+  .team-card h4 {
+    font-size:.92rem; font-weight:700;
+    color:var(--white); margin-bottom:8px; letter-spacing:.5px;
+  }
 
-            .section-title {
-                font-size: 2rem;
-            }
+  .team-card p {
+    font-size:.84rem; color:var(--muted); line-height:1.65;
+  }
 
-            .app-title {
-                font-size: 1.2rem;
-            }
+  /* ── CONTACT ── */
+  #contact { border-bottom:1px solid var(--border); }
 
-            .preview-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        .logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.screenshot img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 12px;
-}
-    </style>
+  .contact-box {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:36px;
+    max-width:560px;
+  }
+
+  .form-row { margin-bottom:18px; }
+
+  .form-row label {
+    display:block;
+    font-size:.75rem; font-weight:700;
+    letter-spacing:1.2px; text-transform:uppercase;
+    color:var(--muted); margin-bottom:7px;
+  }
+
+  .form-row input,
+  .form-row textarea {
+    width:100%;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:11px 14px;
+    color:var(--text);
+    font-family:inherit;
+    font-size:.93rem;
+    outline:none;
+    transition:border-color .2s, box-shadow .2s;
+  }
+
+  .form-row input:focus,
+  .form-row textarea:focus {
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(59,158,255,0.10);
+  }
+
+  .form-row textarea { resize:vertical; min-height:106px; }
+
+  .btn-whatsapp {
+    display:flex; align-items:center; justify-content:center;
+    gap:10px; width:100%;
+    background:transparent;
+    border:1px solid var(--blue);
+    color:var(--blue);
+    font-family:inherit; font-weight:700;
+    font-size:.95rem; letter-spacing:.5px;
+    padding:13px 24px; border-radius:var(--radius);
+    cursor:pointer;
+    transition:background .2s, color .2s, transform .15s;
+  }
+
+  .btn-whatsapp:hover { background:var(--blue); color:#000; transform:translateY(-1px); }
+  .btn-whatsapp:active { transform:translateY(0); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align:center; padding:28px 24px 18px;
+    border-top:1px solid var(--border);
+    color:var(--muted); font-size:.82rem;
+    line-height:1.8;
+  }
+
+  footer span { color:var(--blue); }
+
+  /* ── FIXED BOTTOM BAR ── */
+  .dl-bar {
+    position:fixed; bottom:0; left:0; right:0; z-index:300;
+    background:#000;
+    border-top:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:11px 20px; gap:12px;
+  }
+
+  .dl-bar-txt {
+    font-size:.82rem; color:var(--muted); line-height:1.4;
+  }
+
+  .dl-bar-txt strong { color:var(--text); display:block; font-size:.87rem; }
+
+  .btn-dl-sm {
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--blue); color:#000;
+    font-family:inherit; font-weight:700;
+    font-size:.82rem; letter-spacing:.5px;
+    padding:9px 18px; border-radius:6px;
+    text-decoration:none; white-space:nowrap; flex-shrink:0;
+    transition:background .2s, transform .15s;
+  }
+
+  .btn-dl-sm:hover { background:#5db8ff; transform:translateY(-1px); }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:640px) {
+    .nav-links { display:none; }
+    nav { padding:0 18px; }
+    .section-wrap { padding:52px 18px; }
+    .contact-box { padding:22px 16px; }
+    .hero-title { letter-spacing:0; }
+    .dl-bar-txt strong { font-size:.82rem; }
+  }
+
+  @media(max-width:400px) {
+    .features-grid { grid-template-columns:1fr; }
+    .team-grid { grid-template-columns:1fr; }
+  }
+</style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="header-content">
-            <div class="logo">
-    <img src="https://i.ibb.co/4wwzXykd/1000094206-removebg-preview.png" alt="चंदन जी टीम लोगो">
-</div>
-            <div class="app-title">चंदन जी टीम</div>
-        </div>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1>चंदन जी टीम</h1>
-            <p>संपूर्ण श्रमिक प्रबंधन समाधान</p>
-            <button class="btn-primary" onclick="scrollToDownload()">ऐप डाउनलोड करें</button>
-        </div>
-    </section>
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#hero">CJT</a>
+  <ul class="nav-links">
+    <li><a href="#features">सुविधाएँ</a></li>
+    <li><a href="#how">प्रक्रिया</a></li>
+    <li><a href="#team">टीम</a></li>
+    <li><a href="#contact">संपर्क</a></li>
+  </ul>
+</nav>
 
-    <!-- Features Section -->
-    <section class="features">
-        <div class="container">
-            <h2 class="section-title">शक्तिशाली विशेषताएं</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">👥</div>
-                    <h3>श्रमिक प्रबंधन</h3>
-                    <p>विस्तृत प्रोफाइल, संपर्क जानकारी और कार्य इतिहास ट्रैकिंग के साथ अपनी पूरी श्रमिक टीम को कुशलतापूर्वक प्रबंधित करें।</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📋</div>
-                    <h3>उपस्थिति और देहरी</h3>
-                    <p>दैनिक उपस्थिति और देहरी (दैनिक मजदूरी) को आसानी से ट्रैक करें। वेतन प्रसंस्करण के लिए सटीक रिकॉर्ड तैयार करें।</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💰</div>
-                    <h3>भुगतान और रिपोर्ट</h3>
-                    <p>भुगतान को सहजता से प्रबंधित करें और बेहतर व्यावसायिक अंतर्दृष्टि और लेखांकन के लिए व्यापक रिपोर्ट तैयार करें।</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>सुरक्षित डेटा</h3>
-                    <p>आपका डेटा एन्क्रिप्टेड है और सुरक्षित रूप से संग्रहीत है। लॉक सुरक्षा सुनिश्चित करती है कि केवल अधिकृत व्यक्ति ही संवेदनशील जानकारी तक पहुंच सकें।</p>
-                </div>
-                <div class="feature-card">
-    <div class="feature-icon">👷</div>
-    <h3>टीम उपयोग ऐप</h3>
-    <p>यह ऐप अभिषेक द्वारा अपनी टीम और दैनिक कार्य के प्रबंधन के लिए विकसित किया गया है।</p>
-</div>
-            </div>
-        </div>
-    </section>
+<!-- ══ HERO ══ -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-badge reveal"><i class="fa fa-mobile-screen"></i> लेबर मैनेजमेंट ऐप</div>
+    <h1 class="hero-title reveal reveal-d1"><em>चंदन जी</em><br>टीम</h1>
+    <p class="hero-sub reveal reveal-d2">लेबर मैनेजमेंट सिस्टम</p>
+    <p class="hero-desc reveal reveal-d3">
+      यह ऐप केवल हमारी टीम के लिए डिज़ाइन की गई है। इसके माध्यम से अटेंडेंस, दिहाड़ी और भुगतान प्रबंधन आसान हो जाता है।
+    </p>
+    <a href="https://file-to-link-7zyro-1d402ae4f299.herokuapp.com/dl/69a13455980a4d1980d6b47a"
+       class="btn-primary reveal reveal-d4" download>
+      <i class="fa fa-download"></i> ऐप डाउनलोड करें
+    </a>
+  </div>
+</section>
 
-    <!-- App Preview Section -->
-<section class="app-preview">
-    <div class="container">
-        <h2 class="section-title">ऐप स्क्रीनशॉट</h2>
-
-        <div class="preview-grid">
-            <div class="screenshot">
-                <img src="https://i.ibb.co/Gf5KzDR4/Screenshot-20260202-081840-807.png" alt="ऐप स्क्रीनशॉट 1">
-            </div>
-
-            <div class="screenshot">
-                <img src="https://i.ibb.co/60qkwLxz/Screenshot-20260202-082341-Chrome.png">
-            </div>
-
-            <div class="screenshot">
-                <img src="https://i.ibb.co/gMNkKGKL/Screenshot-20260202-082310-Chrome.png">
-            </div>
-            <div class="screenshot">
-                <img src="https://i.ibb.co/n8bHcC14/Screenshot-20260202-082646-972.png">
-            </div>
-        </div>
+<!-- ══ FEATURES ══ -->
+<section id="features">
+  <div class="section-wrap">
+    <div class="section-label reveal"><i class="fa fa-star"></i> क्या खास है?</div>
+    <h2 class="section-heading reveal">ऐप की मुख्य सुविधाएँ</h2>
+    <div class="section-bar reveal"></div>
+    <div class="features-grid">
+      <div class="feat-card reveal reveal-d1">
+        <div class="feat-icon"><i class="fa fa-calendar-check"></i></div>
+        <div class="feat-text">एक दिन में केवल एक अटेंडेंस — डुप्लीकेट एंट्री से बचाव</div>
+      </div>
+      <div class="feat-card reveal reveal-d2">
+        <div class="feat-icon"><i class="fa fa-money-bill"></i></div>
+        <div class="feat-text">1 / 1.5 / 2 / 2.5 दिहाड़ी सिस्टम — लचीला भुगतान विकल्प</div>
+      </div>
+      <div class="feat-card reveal reveal-d3">
+        <div class="feat-icon"><i class="fa fa-user-lock"></i></div>
+        <div class="feat-text">सीक्रेट की से लॉगिन — केवल अधिकृत सदस्यों की पहुँच</div>
+      </div>
+      <div class="feat-card reveal reveal-d4">
+        <div class="feat-icon"><i class="fa fa-check-circle"></i></div>
+        <div class="feat-text">भुगतान स्वीकृति प्रणाली — एडमिन की अनुमति के बाद भुगतान</div>
+      </div>
+      <div class="feat-card reveal reveal-d5">
+        <div class="feat-icon"><i class="fa fa-file-pdf"></i></div>
+        <div class="feat-text">पीडीएफ रिपोर्ट डाउनलोड — एक क्लिक में पूरी रिपोर्ट</div>
+      </div>
     </div>
-    </section>
+  </div>
+</section>
 
-    <!-- About Section -->
-    <section class="about">
-        <div class="container">
-            <h2 class="section-title">ऐप के बारे में</h2>
-            <div class="about-content">
-                <p>
-                    चंदन जी टीम एक व्यापक श्रमिक प्रबंधन एप्लिकेशन है जो विशेष रूप से उन व्यवसायों के लिए डिज़ाइन किया गया है 
-                    जिन्हें श्रमिकों, उपस्थिति, दैनिक मजदूरी (देहरी), और भुगतान को ट्रैक करने की आवश्यकता होती है। सरलता और 
-                    दक्षता को ध्यान में रखते हुए बनाया गया, यह ऐप आपको अपने कार्यबल प्रबंधन संचालन को सुव्यवस्थित करने, 
-                    सटीक रिकॉर्ड बनाए रखने और विस्तृत रिपोर्ट तैयार करने में मदद करता है। चाहे आप निर्माण स्थल, 
-                    विनिर्माण इकाई, या दैनिक वेतन श्रमिकों वाले किसी भी व्यवसाय का प्रबंधन कर रहे हों, सीजेटी एक सुरक्षित 
-                    प्लेटफ़ॉर्म में आपकी आवश्यक सभी उपकरण प्रदान करता है।
-                </p>
-            </div>
+<!-- ══ HOW IT WORKS ══ -->
+<section id="how">
+  <div class="section-wrap">
+    <div class="section-label reveal"><i class="fa fa-circle-nodes"></i> कार्यप्रवाह</div>
+    <h2 class="section-heading reveal">काम करने की प्रक्रिया</h2>
+    <div class="section-bar reveal"></div>
+    <div class="steps">
+      <div class="step reveal reveal-d1">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <strong>लॉगिन करें</strong>
+          <span>वर्कर अपनी सीक्रेट की से ऐप में लॉगिन करता है।</span>
         </div>
-    </section>
-
-    <!-- Disclaimer Section -->
-    <section class="disclaimer">
-        <div class="container">
-            <div class="disclaimer-content">
-                <h2>⚠️ महत्वपूर्ण अस्वीकरण</h2>
-                <ul>
-                    <li>यह ऐप केवल व्यावसायिक और निजी उपयोग के लिए है</li>
-                    <li>किसी भी सरकारी संगठन या विभाग से संबद्ध नहीं है</li>
-                    <li>उपयोगकर्ता स्थानीय श्रम कानूनों के अनुपालन के लिए जिम्मेदार हैं</li>
-                    <li>डेटा की सटीकता उपयोगकर्ता की जिम्मेदारी है</li>
-                </ul>
-            </div>
+      </div>
+      <div class="step reveal reveal-d2">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <strong>अटेंडेंस दर्ज करें</strong>
+          <span>रोजाना एक बार अटेंडेंस दर्ज की जाती है।</span>
         </div>
-    </section>
-
-    <!-- Privacy Policy Section -->
-    <section class="privacy">
-        <div class="container">
-            <div class="privacy-content">
-                <h2>🔒 गोपनीयता नीति</h2>
-                <ul>
-                    <li>आपका डेटा आपके डिवाइस पर स्थानीय रूप से संग्रहीत है और तृतीय पक्षों के साथ साझा नहीं किया जाता है</li>
-                    <li>कोई व्यक्तिगत जानकारी एकत्र या बाहरी सर्वर पर प्रेषित नहीं की जाती है</li>
-                    <li>ऐप लॉक सुविधा सुनिश्चित करती है कि आपका डेटा निजी और सुरक्षित रहे</li>
-                    <li>ऐप कोई भ्रामक या अनधिकृत संदेश उत्पन्न, प्रदर्शित या संशोधित नहीं करता है।</li>
-                    <li>हम आपकी जानकारी को किसी भी तरह से ट्रैक, बेचते या मुद्रीकृत नहीं करते हैं</li>
-                </ul>
-            </div>
+      </div>
+      <div class="step reveal reveal-d3">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <strong>एडमिन भुगतान दर्ज करता है</strong>
+          <span>एडमिन पैनल से दिहाड़ी और भुगतान जोड़ा जाता है।</span>
         </div>
-    </section>
-
-    <!-- Download Section -->
-    <section class="download" id="download-section">
-        <div class="container">
-            <h2>शुरू करने के लिए तैयार हैं?</h2>
-            <p style="font-size: 1.2rem; margin-bottom: 30px;">चंदन जी टीम अभी डाउनलोड करें और अपने श्रमिक प्रबंधन को सरल बनाएं</p>
-            <button class="btn-download" onclick="handleDownload()">📥 APK डाउनलोड करें</button>
+      </div>
+      <div class="step reveal reveal-d4">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <strong>भुगतान स्वीकृति</strong>
+          <span>वर्कर भुगतान को स्वीकृत या अस्वीकृत करता है।</span>
         </div>
-        <div id="qrBox" style="margin-top:25px; display:flex; justify-content:center;"></div>
-<p style="margin-top:10px; opacity:0.9;">ऐप डाउनलोड करने के लिए स्कैन करें</p>
-<button class="btn-download" style="margin-top:15px;" onclick="openWebMode()">
-🌐 वेब संस्करण खोलें
-</button>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 चंदन जी टीम। सर्वाधिकार सुरक्षित।</p>
+      </div>
+      <div class="step reveal reveal-d5">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <strong>रिपोर्ट डाउनलोड करें</strong>
+          <span>रिपोर्ट कभी भी पीडीएफ में डाउनलोड की जा सकती है।</span>
         </div>
-    </footer>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <script>
-        // Scroll to download section
-        function scrollToDownload() {
-            document.getElementById('download-section').scrollIntoView({ 
-                behavior: 'smooth' 
-            });
-        }
+<!-- ══ TEAM SYSTEM ══ -->
+<section id="team">
+  <div class="section-wrap">
+    <div class="section-label reveal"><i class="fa fa-users"></i> टीम प्रणाली</div>
+    <h2 class="section-heading reveal">हमारी टीम प्रणाली</h2>
+    <div class="section-bar reveal"></div>
+    <div class="team-grid">
+      <div class="team-card reveal reveal-d1">
+        <i class="fa fa-users"></i>
+        <h4>हेल्पर और कारीगर</h4>
+        <p>हेल्पर और कारीगर दोनों अलग-अलग रिकॉर्ड के साथ काम कर सकते हैं।</p>
+      </div>
+      <div class="team-card reveal reveal-d2">
+        <i class="fa fa-clock"></i>
+        <h4>दिन और रात शिफ्ट</h4>
+        <p>दिन और रात दोनों प्रकार के कार्य समर्थित हैं — किसी भी समय रिकॉर्ड करें।</p>
+      </div>
+      <div class="team-card reveal reveal-d3">
+        <i class="fa fa-coins"></i>
+        <h4>लचीली दिहाड़ी</h4>
+        <p>दिहाड़ी 1, 1.5, 2 और 2.5 तक लगाई जाती है — काम के अनुसार।</p>
+      </div>
+      <div class="team-card reveal reveal-d4">
+        <i class="fa fa-shield-halved"></i>
+        <h4>एडमिन नियंत्रण</h4>
+        <p>पूरा नियंत्रण एडमिन पैनल से होता है — सुरक्षित और व्यवस्थित।</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-        // Handle download button click
-        function handleDownload() {
-            alert('APK जल्द आ रहा है');
-        }
+<!-- ══ CONTACT ══ -->
+<section id="contact">
+  <div class="section-wrap">
+    <div class="section-label reveal"><i class="fa fa-envelope"></i> सम्पर्क</div>
+    <h2 class="section-heading reveal">संपर्क करें</h2>
+    <div class="section-bar reveal"></div>
+    <div class="contact-box reveal">
+      <div class="form-row">
+        <label>नाम</label>
+        <input type="text" id="c-name" placeholder="अपना नाम लिखें…">
+      </div>
+      <div class="form-row">
+        <label>मोबाइल नंबर</label>
+        <input type="tel" id="c-mobile" placeholder="मोबाइल नंबर…">
+      </div>
+      <div class="form-row">
+        <label>संदेश</label>
+        <textarea id="c-msg" placeholder="अपना संदेश लिखें…"></textarea>
+      </div>
+      <button class="btn-whatsapp" onclick="sendWA()">
+        <i class="fa fa-paper-plane"></i> व्हाट्सएप पर भेजें
+      </button>
+    </div>
+  </div>
+</section>
 
-        // Add scroll animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 <span>चंदन जी टीम</span> &nbsp;·&nbsp; स्वामी: <span>चंदन शर्मा</span></p>
+  <p>डिज़ाइन एवं डेवलपमेंट: <span>अभिषेक</span></p>
+</footer>
 
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
+<!-- FIXED BOTTOM BAR -->
+<div class="dl-bar">
+  <div class="dl-bar-txt">
+    <strong>ऐप डाउनलोड करें</strong>
+    केवल टीम सदस्यों के लिए
+  </div>
+  <a href="http://hc1.checker.in/file2link/documents/file_503804.apk/C.J.T.apk"
+     class="btn-dl-sm" download>
+    <i class="fa fa-download"></i> अभी डाउनलोड करें
+  </a>
+</div>
 
-        // Observe all sections
-        document.addEventListener('DOMContentLoaded', function() {
-            const sections = document.querySelectorAll('section');
-            sections.forEach(section => {
-                observer.observe(section);
-            });
-        });
-        new QRCode(document.getElementById("qrBox"), {
-    text: "https://filetolinkneon1-5b71323869de.herokuapp.com/stream/1284552?hash=51569a&d=true",
-    width: 180,
-    height: 180
-});
-function handleDownload() {
-    window.location.href = "https://filetolinkneon1-5b71323869de.herokuapp.com/stream/1284552?hash=51569a&d=true";
-}
-function openWebMode() {
-    window.open("https://cjtweb.kumarthakurabhishek41.workers.dev", "_blank");
-}
-    </script>
+<script>
+  /* ── Intersection Observer – Fade-in on scroll ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ── WhatsApp Contact ── */
+  function sendWA() {
+    const name   = document.getElementById('c-name').value.trim();
+    const mobile = document.getElementById('c-mobile').value.trim();
+    const msg    = document.getElementById('c-msg').value.trim();
+
+    if (!name || !mobile || !msg) {
+      alert('कृपया सभी फ़ील्ड भरें।');
+      return;
+    }
+
+    const text = `नाम: ${name}\nमोबाइल: ${mobile}\nसंदेश: ${msg}`;
+    window.open(`https://wa.me/91 85128 94229?text=${encodeURIComponent(text)}`, '_blank');
+  }
+</script>
 </body>
 </html>
